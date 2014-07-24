@@ -1,0 +1,165 @@
+<?xml version="1.0"?>
+<skipper version="3.0.0.1104" mvc="Symfony2" orm="Doctrine2">
+  <module name="ShipmentGatewayBundle" import-format="Doctrine2Php" import-path="../Entity" uuid="d1c024e9-217b-4838-bd34-e36b8a6d69f2">
+    <entity name="ShipmentGateway" description="Stores shipment gateway definitions." uuid="d5ebf51d-1d06-42b3-9ad5-36bc976dc5e8">
+      <field name="id" description="System given id." type="integer" size="10" required="true" unique="true" primary="true" auto-increment="true" uuid="554eaff0-0351-4e04-92fe-02169d749330"/>
+      <field name="date_added" description="Date when the gateway added." type="datetime" required="true" uuid="4dd8dd66-b1b9-4203-b867-ebbb324b7348"/>
+      <field name="settings" description="Serialized and base64 encoded settings." type="text" uuid="efe8a106-d081-41b0-b9a5-05b6c77aa5b7"/>
+      <field name="site" description="Site that shipment gateway belons to." type="integer" size="10" required="true" uuid="62593c57-9808-42ed-8c61-d4494d227d0c"/>
+      <index name="idx_u_shipment_gateway_id" unique="true">
+        <index-field name="id"/>
+      </index>
+      <index name="idx_n_shipment_gateway_date_added">
+        <index-field name="date_added"/>
+      </index>
+      <orm-attributes>
+        <attribute name="options">
+          <attribute name="charset">utf8</attribute>
+          <attribute name="collate">utf8_turkish_ci</attribute>
+          <attribute name="engine">innodb</attribute>
+        </attribute>
+        <attribute name="table">shipment_gateway</attribute>
+        <attribute name="export-file-name">ShipmentGateway.php</attribute>
+      </orm-attributes>
+    </entity>
+    <association from="ShipmentGateway" to="Site" caption="idx_f_shipment_gateway_site" inverse-alias="site" uuid="96705f6f-7481-40d2-bccd-01921d4cbf00">
+      <association-field from="site" to="id"/>
+      <orm-attributes>
+        <attribute name="on-delete">CASCADE</attribute>
+      </orm-attributes>
+    </association>
+    <entity name="ShipmentGatewayLocalization" description="Stores localized values for each shipment gateway entry." uuid="e76be39c-2ddd-461f-84a9-d433f916487c">
+      <field name="gateway" description="Localized gateway." type="integer" size="10" required="true" primary="true" uuid="4151984f-949e-4ade-99f2-54f913509410"/>
+      <field name="language" description="Localization language." type="integer" size="5" required="true" primary="true" uuid="33ea18dc-09d4-4c3c-a60f-404dd00c8fcf"/>
+      <field name="name" description="Localized shipment gateway name." type="string" size="155" required="true" uuid="0ccf6af4-024b-4fa6-8c1b-80d8b340a78e"/>
+      <field name="url_key" description="Localized shipment gatewat url key." type="string" size="255" required="true" uuid="220bcf43-dc08-4605-bfa5-5716ec055f9a"/>
+      <field name="description" description="Localized description." type="string" size="255" uuid="5b15cb73-d6a8-47a2-972d-468ade0c181b"/>
+      <index name="idx_u_shipment_gateway_localization" unique="true">
+        <index-field name="gateway"/>
+        <index-field name="language"/>
+      </index>
+      <index name="idx_u_shipment_gateway_localization_url_key" unique="true">
+        <index-field name="language"/>
+        <index-field name="url_key"/>
+      </index>
+      <orm-attributes>
+        <attribute name="options">
+          <attribute name="charset">utf8</attribute>
+          <attribute name="collate">utf8_turkish_ci</attribute>
+          <attribute name="engine">innodb</attribute>
+        </attribute>
+        <attribute name="table">shipment_gateway_localization</attribute>
+        <attribute name="export-file-name">ShipmentGatewayLocalization.php</attribute>
+      </orm-attributes>
+    </entity>
+    <association from="ShipmentGatewayLocalization" to="ShipmentGateway" caption="idx_f_shipment_gateway_localization_gateway" owner-alias="localizations" inverse-alias="shipment_gateway" uuid="388a1477-9230-4880-a470-f6994e25dffe">
+      <association-field from="gateway" to="id"/>
+      <orm-attributes>
+        <attribute name="on-delete">CASCADE</attribute>
+      </orm-attributes>
+    </association>
+    <association from="ShipmentGatewayLocalization" to="Language" caption="idx_f_shipment_gateway_localization_language" inverse-alias="language" uuid="97dbd6f4-3c1f-41ac-82ac-a4190b40b316">
+      <association-field from="language" to="id"/>
+      <orm-attributes>
+        <attribute name="on-delete">CASCADE</attribute>
+      </orm-attributes>
+    </association>
+    <entity name="ShipmentGatewayRegion" description="Tracks shipment gateways service regions." uuid="a4452bd1-346a-4b4b-9087-06597a479f92">
+      <field name="id" description="System given id." type="integer" size="10" required="true" unique="true" primary="true" auto-increment="true" uuid="b9bfb5e1-c911-444e-9382-cd241018a0de"/>
+      <field name="gateway" description="Shipment gateway." type="integer" size="10" required="true" uuid="6bb29490-5fd7-4961-870f-91d5d0e4e915"/>
+      <field name="city" description="City to ship." type="integer" size="10" uuid="d78e890e-c07a-4a1d-ba01-8b0c3940613d"/>
+      <field name="state" description="State to ship." type="integer" size="10" uuid="b04d0e62-d130-4cc0-9611-c31a39b7a8d4"/>
+      <field name="country" description="Country to ship." type="integer" size="10" uuid="61504857-dcde-4c87-8be4-a28cf5204ae0"/>
+      <orm-attributes>
+        <attribute name="options">
+          <attribute name="charset">utf8</attribute>
+          <attribute name="collate">ut8_turkish_ci</attribute>
+          <attribute name="engine">innodb</attribute>
+        </attribute>
+        <attribute name="table">shipment_gateway_region</attribute>
+        <attribute name="export-file-name">ShipmentGatewayRegion.php</attribute>
+      </orm-attributes>
+    </entity>
+    <entity name="ShipmentRate" description="Stores definitions of shipment rates." uuid="e6d766d7-23c4-4524-8f6c-3319071cb426">
+      <field name="id" description="System given id." type="integer" size="10" required="true" unique="true" primary="true" auto-increment="true" uuid="2026c7a7-072f-4c37-9d1f-974b60b61349"/>
+      <field name="region" description="Region that rate is valid for." type="integer" size="10" uuid="7f562d15-a7bd-4c3b-8f3c-93ba23a8fb48"/>
+      <field name="product_category" description="Product category that rate is valid for." type="integer" size="10" required="true" uuid="cd012a42-4c4b-4e4e-8bcc-ad94fc6af45e"/>
+      <field name="rate" description="Rate to apply." type="decimal" size="10" default="0" required="true" uuid="d89fc560-e078-4232-9c39-78275c6d8441"/>
+      <field name="other_restrictions" description="Other restrictions - json endcoded." type="text" uuid="3d209bd9-8ab1-4654-964e-bc9ffc38b30e"/>
+      <index name="idx_u_shipment_rate_id">
+        <index-field name="id"/>
+      </index>
+      <orm-attributes>
+        <attribute name="options">
+          <attribute name="charset">utf8</attribute>
+          <attribute name="collate">utf8_turkish_ci</attribute>
+          <attribute name="engine">innodb</attribute>
+        </attribute>
+        <attribute name="table">shipment_rate</attribute>
+        <attribute name="export-file-name">ShipmentRate.php</attribute>
+      </orm-attributes>
+    </entity>
+    <association from="ShipmentRate" to="ShipmentGatewayRegion" caption="idx_f_shipment_rate_region" owner-alias="shipment_rates" inverse-alias="shipment_gateway_region" uuid="7cab0151-030a-42d8-8232-553c1e103581">
+      <association-field from="region" to="id"/>
+      <orm-attributes>
+        <attribute name="on-delete">CASCADE</attribute>
+      </orm-attributes>
+    </association>
+    <association from="ShipmentRate" to="ProductCategory" caption="idx_f_shipment_rate_product_category" inverse-alias="product_category" uuid="492a3269-06f4-4b1e-bc9b-1cb05bea1ed9">
+      <association-field from="product_category" to="id"/>
+      <orm-attributes>
+        <attribute name="on-delete">CASCADE</attribute>
+      </orm-attributes>
+    </association>
+    <entity name="ShipmentGatewayRegionLocalization" description="Stores localized values for each region entry." uuid="bdcda6e1-f273-46cc-80ef-d48370fcac05">
+      <field name="region" description="Localized region." type="integer" size="10" required="true" primary="true" uuid="44cdf6aa-7dd1-4bf0-8b6d-1d2bdce9aedd"/>
+      <field name="language" description="Localization language." type="integer" size="5" required="true" primary="true" uuid="30afece5-1977-4710-8477-4deb5811a43a"/>
+      <field name="name" description="Region name" type="string" size="155" required="true" uuid="c1e60bfc-ed7a-409f-b741-4f50cddf2ff8"/>
+      <field name="url_key" description="Region url key." type="string" size="255" required="true" uuid="864abd6f-0408-4a4c-bb1c-f95b5c8de99e"/>
+      <index name="idx_u_shipment_gateway_region_localization" unique="true">
+        <index-field name="region"/>
+        <index-field name="language"/>
+      </index>
+      <index name="idx_u_shipment_gateway_region_localization_url_key" unique="true">
+        <index-field name="language"/>
+        <index-field name="url_key"/>
+      </index>
+      <orm-attributes>
+        <attribute name="options">
+          <attribute name="charset">utf8</attribute>
+          <attribute name="collate">utf8_turkish_ci</attribute>
+          <attribute name="engine">innodb</attribute>
+        </attribute>
+        <attribute name="table">shipment_gateway_region_localization</attribute>
+        <attribute name="export-file-name">ShipmentGatewayRegionLocalization.php</attribute>
+      </orm-attributes>
+    </entity>
+    <association from="ShipmentGatewayRegionLocalization" to="Language" caption="idx_f_shipment_gateway_region_localization_language" inverse-alias="languages" uuid="77032bf2-796d-4af0-a2d8-5697b5c3403a">
+      <association-field from="language" to="id"/>
+      <orm-attributes>
+        <attribute name="on-delete">CASCADE</attribute>
+      </orm-attributes>
+    </association>
+    <association from="ShipmentGatewayRegionLocalization" to="ShipmentGatewayRegion" caption="idx_f_shipment_gateway_region_localization_region" owner-alias="localizations" inverse-alias="shipment_gateway_regions" uuid="b566f3e3-980b-4cde-a831-4ea5bfcaaacc">
+      <association-field from="region" to="id"/>
+      <orm-attributes>
+        <attribute name="on-delete">CASCADE</attribute>
+      </orm-attributes>
+    </association>
+    <comment caption="ShipmentGatewayBundle Pricing" description="shipment_gateway: 105 TL&#10;shipment_gateway_localization: 150 TL&#10;shipment_gateway_region: 200 TL&#10;shipment_gateway_region_localization: 130 TL&#10;shipment_rate: 130 TL&#10;&#10;toplam: 715 TL" uuid="8a16be46-6e80-476e-9925-a2c1805daf76"/>
+    <orm-attributes>
+      <attribute name="namespace">BiberLtd\Core\Bundles\ShipmentGatewayBundle\Entity</attribute>
+      <attribute name="filename-format">entity-name-only</attribute>
+      <attribute name="file-suffix">without-suffix</attribute>
+    </orm-attributes>
+  </module>
+  <visual-data>
+    <comment uuid="8a16be46-6e80-476e-9925-a2c1805daf76" bg-color="4294948765" position-x="0" position-y="19" size-x="0" size-x2="211" size-y="0" size-y2="131" txt-color="4278190080"/>
+    <entity uuid="a4452bd1-346a-4b4b-9087-06597a479f92" bg-color="4294967295" hdr-color="4292006610" position-x="250" position-y="150" size-x="0" size-x2="126" size-y="0" size-y2="87"/>
+    <entity uuid="bdcda6e1-f273-46cc-80ef-d48370fcac05" bg-color="4294967295" hdr-color="4292006610" position-x="150" position-y="350" size-x="0" size-x2="184" size-y="0" size-y2="73"/>
+    <module uuid="d1c024e9-217b-4838-bd34-e36b8a6d69f2" bg-color="4289069311" size-x="0" size-x2="749" size-y="0" size-y2="500"/>
+    <entity uuid="d5ebf51d-1d06-42b3-9ad5-36bc976dc5e8" bg-color="4294967295" hdr-color="4292006610" position-x="250" position-y="50" size-x="0" size-x2="91" size-y="0" size-y2="20"/>
+    <entity uuid="e6d766d7-23c4-4524-8f6c-3319071cb426" bg-color="4294967295" hdr-color="4292006610" position-x="500" position-y="300" size-x="0" size-x2="72" size-y="0" size-y2="20"/>
+    <entity uuid="e76be39c-2ddd-461f-84a9-d433f916487c" bg-color="4294967295" hdr-color="4292006610" position-x="500" position-y="50" size-x="0" size-x2="149" size-y="0" size-y2="87"/>
+  </visual-data>
+</skipper>
