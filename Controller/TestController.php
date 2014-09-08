@@ -18,7 +18,7 @@
  *
  */
 
-namespace BiberLtd\Core\Bundles\ShipmentGatewayBundle\Controller;
+namespace BiberLtd\Bundle\ShipmentGatewayBundle\Controller;
 use BiberLtd\Core\CoreController;
 
 

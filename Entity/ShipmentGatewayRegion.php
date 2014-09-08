@@ -14,7 +14,7 @@
  * @description Model / Entity class.
  *
  */
-namespace BiberLtd\Core\Bundles\ShipmentGatewayBundle\Entity;
+namespace BiberLtd\Bundle\ShipmentGatewayBundle\Entity;
 use Doctrine\ORM\Mapping AS ORM;
 use BiberLtd\Core\CoreEntity;
 /** 
@@ -55,7 +55,7 @@ class ShipmentGatewayRegion extends CoreEntity
 
     /** 
      * @ORM\OneToMany(
-     *     targetEntity="BiberLtd\Core\Bundles\ShipmentGatewayBundle\Entity\ShipmentRate",
+     *     targetEntity="BiberLtd\Bundle\ShipmentGatewayBundle\Entity\ShipmentRate",
      *     mappedBy="shipment_gateway_region"
      * )
      */
@@ -63,7 +63,7 @@ class ShipmentGatewayRegion extends CoreEntity
 
     /** 
      * @ORM\OneToMany(
-     *     targetEntity="BiberLtd\Core\Bundles\ShipmentGatewayBundle\Entity\ShipmentGatewayRegionLocalization",
+     *     targetEntity="BiberLtd\Bundle\ShipmentGatewayBundle\Entity\ShipmentGatewayRegionLocalization",
      *     mappedBy="shipment_gateway_regions"
      * )
      */

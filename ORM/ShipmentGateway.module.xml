@@ -148,7 +148,7 @@
     </association>
     <comment caption="ShipmentGatewayBundle Pricing" description="shipment_gateway: 105 TL&#10;shipment_gateway_localization: 150 TL&#10;shipment_gateway_region: 200 TL&#10;shipment_gateway_region_localization: 130 TL&#10;shipment_rate: 130 TL&#10;&#10;toplam: 715 TL" uuid="8a16be46-6e80-476e-9925-a2c1805daf76"/>
     <orm-attributes>
-      <attribute name="namespace">BiberLtd\Core\Bundles\ShipmentGatewayBundle\Entity</attribute>
+      <attribute name="namespace">BiberLtd\Bundle\ShipmentGatewayBundle\Entity</attribute>
       <attribute name="filename-format">entity-name-only</attribute>
       <attribute name="file-suffix">without-suffix</attribute>
     </orm-attributes>
