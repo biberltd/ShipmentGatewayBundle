@@ -1,7 +1,7 @@
 <?php
 /**
  * @name        ShipmentGateway
- * @package		BiberLtd\Core\ShipmentGatewayBundle
+ * @package		BiberLtd\Bundle\CoreBundle\ShipmentGatewayBundle
  *
  * @author		Murat Ünal
  *
@@ -14,9 +14,9 @@
  * @description Model / Entity class.
  *
  */
-namespace BiberLtd\Core\Bundles\ShipmentGatewayBundle\Entity;
+namespace BiberLtd\Bundle\ShipmentGatewayBundle\Entity;
 use Doctrine\ORM\Mapping AS ORM;
-use BiberLtd\Core\CoreLocalizableEntity;
+use BiberLtd\Bundle\CoreBundle\CoreLocalizableEntity;
 /** 
  * @ORM\Entity
  * @ORM\Table(
@@ -47,14 +47,14 @@ class ShipmentGateway extends CoreLocalizableEntity
 
     /** 
      * @ORM\OneToMany(
-     *     targetEntity="BiberLtd\Core\Bundles\ShipmentGatewayBundle\Entity\ShipmentGatewayLocalization",
+     *     targetEntity="BiberLtd\Bundle\ShipmentGatewayBundle\Entity\ShipmentGatewayLocalization",
      *     mappedBy="shipment_gateway"
      * )
      */
     protected $localizations;
 
     /** 
-     * @ORM\ManyToOne(targetEntity="BiberLtd\Core\Bundles\SiteManagementBundle\Entity\Site")
+     * @ORM\ManyToOne(targetEntity="BiberLtd\Bundle\SiteManagementBundle\Entity\Site")
      * @ORM\JoinColumn(name="site", referencedColumnName="id", nullable=false, onDelete="CASCADE")
      */
     private $site;

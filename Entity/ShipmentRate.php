@@ -1,7 +1,7 @@
 <?php
 /**
  * @name        ShipmentRate
- * @package		BiberLtd\Core\ShipmentGatewayBundle
+ * @package		BiberLtd\Bundle\CoreBundle\ShipmentGatewayBundle
  *
  * @author      Can Berkol
  * @author		Murat Ünal
@@ -15,9 +15,9 @@
  * @description Model / Entity class.
  *
  */
-namespace BiberLtd\Core\Bundles\ShipmentGatewayBundle\Entity;
+namespace BiberLtd\Bundle\ShipmentGatewayBundle\Entity;
 use Doctrine\ORM\Mapping AS ORM;
-use BiberLtd\Core\CoreEntity;
+use BiberLtd\Bundle\CoreBundle\CoreEntity;
 /** 
  * @ORM\Entity
  * @ORM\Table(
@@ -47,7 +47,7 @@ class ShipmentRate extends CoreEntity
 
     /** 
      * @ORM\ManyToOne(
-     *     targetEntity="BiberLtd\Core\Bundles\ShipmentGatewayBundle\Entity\ShipmentGatewayRegion",
+     *     targetEntity="BiberLtd\Bundle\ShipmentGatewayBundle\Entity\ShipmentGatewayRegion",
      *     inversedBy="shipment_rates"
      * )
      * @ORM\JoinColumn(name="region", referencedColumnName="id", onDelete="CASCADE")
@@ -55,7 +55,7 @@ class ShipmentRate extends CoreEntity
     private $shipment_gateway_region;
 
     /** 
-     * @ORM\ManyToOne(targetEntity="BiberLtd\Core\Bundles\ProductManagementBundle\Entity\ProductCategory")
+     * @ORM\ManyToOne(targetEntity="BiberLtd\Bundle\ProductManagementBundle\Entity\ProductCategory")
      * @ORM\JoinColumn(name="product_category", referencedColumnName="id", nullable=false, onDelete="CASCADE")
      */
     private $product_category;

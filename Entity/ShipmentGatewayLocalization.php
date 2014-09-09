@@ -1,7 +1,7 @@
 <?php
 /**
  * @name        ShipmentGatewayLocalization
- * @package		BiberLtd\Core\ShipmentGatewayBundle
+ * @package		BiberLtd\Bundle\CoreBundle\ShipmentGatewayBundle
  *
  * @author		Murat Ünal
  *
@@ -14,9 +14,9 @@
  * @description Model / Entity class.
  *
  */
-namespace BiberLtd\Core\Bundles\ShipmentGatewayBundle\Entity;
+namespace BiberLtd\Bundle\ShipmentGatewayBundle\Entity;
 use Doctrine\ORM\Mapping AS ORM;
-use BiberLtd\Core\CoreEntity;
+use BiberLtd\Bundle\CoreBundle\CoreEntity;
 /** 
  * @ORM\Entity
  * @ORM\Table(
@@ -48,7 +48,7 @@ class ShipmentGatewayLocalization extends CoreEntity
     /** 
      * @ORM\Id
      * @ORM\ManyToOne(
-     *     targetEntity="BiberLtd\Core\Bundles\ShipmentGatewayBundle\Entity\ShipmentGateway",
+     *     targetEntity="BiberLtd\Bundle\ShipmentGatewayBundle\Entity\ShipmentGateway",
      *     inversedBy="localizations"
      * )
      * @ORM\JoinColumn(name="gateway", referencedColumnName="id", nullable=false, onDelete="CASCADE")
@@ -57,7 +57,7 @@ class ShipmentGatewayLocalization extends CoreEntity
 
     /** 
      * @ORM\Id
-     * @ORM\ManyToOne(targetEntity="BiberLtd\Core\Bundles\MultiLanguageSupportBundle\Entity\Language")
+     * @ORM\ManyToOne(targetEntity="BiberLtd\Bundle\MultiLanguageSupportBundle\Entity\Language")
      * @ORM\JoinColumn(name="language", referencedColumnName="id", nullable=false, onDelete="CASCADE")
      */
     private $language;

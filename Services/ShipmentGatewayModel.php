@@ -19,23 +19,23 @@
  * @use         Biberltd\Core\Services
  * @use         Biberltd\Core\CoreModel
  * @use         Biberltd\Core\Services\Encryption
- * @use         BiberLtd\Core\Bundles\ShipmentGatewayBundle\Entity
- * @use         BiberLtd\Core\Bundles\ShipmentGatewayBundle\Services
+ * @use         BiberLtd\Bundle\ShipmentGatewayBundle\Entity
+ * @use         BiberLtd\Bundle\ShipmentGatewayBundle\Services
  *
  */
-namespace BiberLtd\Core\Bundles\ShipmentGatewayBundle\Services;
+namespace BiberLtd\Bundle\ShipmentGatewayBundle\Services;
 
 /** Extends CoreModel */
-use BiberLtd\Core\Bundles\LocationManagementBundle\Services\LocationManagementModel;
-use BiberLtd\Core\CoreModel;
+use BiberLtd\Bundle\LocationManagementBundle\Services\LocationManagementModel;
+use BiberLtd\Bundle\CoreBundle\CoreModel;
 /** Entities to be used */
-use BiberLtd\Core\Bundles\ShipmentGatewayBundle\Entity as BundleEntity;
+use BiberLtd\Bundle\ShipmentGatewayBundle\Entity as BundleEntity;
 /** Helper Models */
-use BiberLtd\Core\Bundles\SiteManagementBundle\Services as SMMService;
-use BiberLtd\Core\Bundles\MultiLanguageSupportBundle\Services as MLSService;
+use BiberLtd\Bundle\SiteManagementBundle\Services as SMMService;
+use BiberLtd\Bundle\MultiLanguageSupportBundle\Services as MLSService;
 /** Core Service */
-use BiberLtd\Core\Services as CoreServices;
-use BiberLtd\Core\Exceptions as CoreExceptions;
+use BiberLtd\Bundle\CoreBundle\Services as CoreServices;
+use BiberLtd\Bundle\CoreBundle\Exceptions as CoreExceptions;
 
 class ShipmentGatewayModel extends CoreModel {
 
