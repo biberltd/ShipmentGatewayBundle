@@ -20,7 +20,7 @@
         "biberltd/core-bundle" : "self.version",
 	"biberltd/product-management-bundle" : "self.version",
 	"biberltd/site-management-bundle" : "self.version",
-	"biberltd/multilanguage-support-bundle" : "self.version""
+	"biberltd/multilanguage-support-bundle" : "self.version"
     },
     "autoload": {
         "psr-0": { "BiberLtd\\Bundle\\ShipmentGatewayBundle": "" }
