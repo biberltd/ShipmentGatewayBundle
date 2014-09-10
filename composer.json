@@ -1,5 +1,5 @@
 {
-    "name": "biberltd/shipmentgatewaybundle",
+    "name": "biberltd/shipment-gateway-bundle",
     "type": "symfony-bundle",
     "description": "",
     "keywords": [],
@@ -17,12 +17,15 @@
         }
     ],
     "require": {
-        "php": ">=5.3.2"
+        "biberltd/core-bundle" : "self.version",
+	"biberltd/product-management-bundle" : "self.version",
+	"biberltd/site-management-bundle" : "self.version",
+	"biberltd/multilanguage-support-bundle" : "self.version""
     },
     "autoload": {
-        "psr-0": { "BiberLtd\\ShipmentGatewayBundle": "" }
+        "psr-0": { "BiberLtd\\Bundle\\ShipmentGatewayBundle": "" }
 
     },
     "minimum-stability": "dev",
-    "target-dir": "BiberLtd/ShipmentGatewayBundle"
+    "target-dir": "BiberLtd/Bundle/ShipmentGatewayBundle"
 }
