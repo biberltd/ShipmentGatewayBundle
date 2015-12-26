@@ -1,18 +1,11 @@
 <?php
 /**
- * @name        ShipmentGatewayRegion
- * @package		BiberLtd\Bundle\CoreBundle\ShipmentGatewayBundle
+ * @author		Can Berkol
  *
- * @author		Murat Ünal
+ * @copyright   Biber Ltd. (http://www.biberltd.com) (C) 2015
+ * @license     GPLv3
  *
- * @version     1.0.0
- * @date        23.09.2013
- *
- * @copyright   Biber Ltd. (http://www.biberltd.com)
- * @license     GPL v3.0
- *
- * @description Model / Entity class.
- *
+ * @date        26.12.2015
  */
 namespace BiberLtd\Bundle\ShipmentGatewayBundle\Entity;
 use Doctrine\ORM\Mapping AS ORM;
@@ -30,80 +23,63 @@ class ShipmentGatewayRegion extends CoreEntity
      * @ORM\Id
      * @ORM\Column(type="integer", length=10)
      * @ORM\GeneratedValue(strategy="AUTO")
+     * @var int
      */
     private $id;
 
     /** 
-     * @ORM\Column(type="integer", length=10, nullable=false)
+     * @ORM\ManyToOne(targetEntity="ShipmentGateway")
+     * @ORM\JoinColumn(name="gateway", referencedColumnName="id", onDelete="CASCADE")
+     * @var \BiberLtd\Bundle\ShipmentGatewayBundle\Entity\ShipmentGateway
      */
     private $gateway;
 
     /** 
-     * @ORM\Column(type="integer", length=10, nullable=true)
+     * @ORM\ManyToOne(targetEntity="BiberLtd\Bundle\LocationManagementBundle\Entity\City")
+     * @ORM\JoinColumn(name="city", referencedColumnName="id", onDelete="CASCADE")
+     * @var \BiberLtd\Bundle\LocationManagementBundle\Entity\City
      */
     private $city;
 
     /** 
-     * @ORM\Column(type="integer", length=10, nullable=true)
+     * @ORM\ManyToOne(targetEntity="BiberLtd\Bundle\LocationManagementBundle\Entity\State")
+     * @ORM\JoinColumn(name="state", referencedColumnName="id")
+     * @var \BiberLtd\Bundle\LocationManagementBundle\Entity\State
      */
     private $state;
 
     /** 
-     * @ORM\Column(type="integer", length=10, nullable=true)
+     * @ORM\ManyToOne(targetEntity="BiberLtd\Bundle\LocationManagementBundle\Entity\Country")
+     * @ORM\JoinColumn(name="country", referencedColumnName="id", onDelete="CASCADE")
+     * @var \BiberLtd\Bundle\LocationManagementBundle\Entity\Country
      */
     private $country;
 
     /** 
-     * @ORM\OneToMany(
-     *     targetEntity="BiberLtd\Bundle\ShipmentGatewayBundle\Entity\ShipmentRate",
-     *     mappedBy="shipment_gateway_region"
-     * )
+     * @ORM\OneToMany(targetEntity="ShipmentRate", mappedBy="shipment_gateway_region")
+     * @var \BiberLtd\Bundle\ShipmentGatewayBundle\Entity\ShipmentRate
      */
     private $shipment_rates;
 
     /** 
-     * @ORM\OneToMany(
-     *     targetEntity="BiberLtd\Bundle\ShipmentGatewayBundle\Entity\ShipmentGatewayRegionLocalization",
-     *     mappedBy="shipment_gateway_regions"
-     * )
+     * @ORM\OneToMany(targetEntity="ShipmentGatewayRegionLocalization", mappedBy="shipment_gateway_region")
+     * @array
      */
     protected $localizations;
 
-    /******************************************************************
-     * PUBLIC SET AND GET FUNCTIONS                                   *
-     ******************************************************************/
-
     /**
-     * @name            getId()
-     *  				Gets $id property.
-     * .
-     * @author          Murat Ünal
-     * @since			1.0.0
-     * @version         1.0.0
-     *
-     * @return          string          $this->id
+     * @return mixed
      */
     public function getId(){
         return $this->id;
     }
 
     /**
-     * @name                  setCity ()
-     *                                Sets the city property.
-     *                                Updates the data only if stored value and value to be set are different.
+     * @param \BiberLtd\Bundle\LocationManagementBundle\Entity\City $city
      *
-     * @author          Can Berkol
-     *
-     * @since           1.0.0
-     * @version         1.0.0
-     *
-     * @use             $this->setModified()
-     *
-     * @param           mixed $city
-     *
-     * @return          object                $this
+     * @return $this
      */
-    public function setCity($city) {
+    public function setCity(\BiberLtd\Bundle\LocationManagementBundle\Entity\City $city) {
         if(!$this->setModified('city', $city)->isModified()) {
             return $this;
         }
@@ -112,37 +88,18 @@ class ShipmentGatewayRegion extends CoreEntity
     }
 
     /**
-     * @name            getCity ()
-     *                          Returns the value of city property.
-     *
-     * @author          Can Berkol
-     *
-     * @since           1.0.0
-     * @version         1.0.0
-     *
-     * @return          mixed           $this->city
+     * @return \BiberLtd\Bundle\LocationManagementBundle\Entity\City
      */
     public function getCity() {
         return $this->city;
     }
 
     /**
-     * @name                  setCountry ()
-     *                                   Sets the country property.
-     *                                   Updates the data only if stored value and value to be set are different.
+     * @param \BiberLtd\Bundle\LocationManagementBundle\Entity\Country $country
      *
-     * @author          Can Berkol
-     *
-     * @since           1.0.0
-     * @version         1.0.0
-     *
-     * @use             $this->setModified()
-     *
-     * @param           mixed $country
-     *
-     * @return          object                $this
+     * @return $this
      */
-    public function setCountry($country) {
+    public function setCountry(\BiberLtd\Bundle\LocationManagementBundle\Entity\Country $country) {
         if(!$this->setModified('country', $country)->isModified()) {
             return $this;
         }
@@ -151,37 +108,18 @@ class ShipmentGatewayRegion extends CoreEntity
     }
 
     /**
-     * @name            getCountry ()
-     *                             Returns the value of country property.
-     *
-     * @author          Can Berkol
-     *
-     * @since           1.0.0
-     * @version         1.0.0
-     *
-     * @return          mixed           $this->country
+     * @return \BiberLtd\Bundle\LocationManagementBundle\Entity\Country
      */
     public function getCountry() {
         return $this->country;
     }
 
     /**
-     * @name                  setGateway ()
-     *                                   Sets the gateway property.
-     *                                   Updates the data only if stored value and value to be set are different.
+     * @param \BiberLtd\Bundle\ShipmentGatewayBundle\Entity\ShipmentGateway $gateway
      *
-     * @author          Can Berkol
-     *
-     * @since           1.0.0
-     * @version         1.0.0
-     *
-     * @use             $this->setModified()
-     *
-     * @param           mixed $gateway
-     *
-     * @return          object                $this
+     * @return $this
      */
-    public function setGateway($gateway) {
+    public function setGateway(\BiberLtd\Bundle\ShipmentGatewayBundle\Entity\ShipmentGateway $gateway) {
         if(!$this->setModified('gateway', $gateway)->isModified()) {
             return $this;
         }
@@ -190,37 +128,18 @@ class ShipmentGatewayRegion extends CoreEntity
     }
 
     /**
-     * @name            getGateway ()
-     *                             Returns the value of gateway property.
-     *
-     * @author          Can Berkol
-     *
-     * @since           1.0.0
-     * @version         1.0.0
-     *
-     * @return          mixed           $this->gateway
+     * @return \BiberLtd\Bundle\ShipmentGatewayBundle\Entity\ShipmentGateway
      */
     public function getGateway() {
         return $this->gateway;
     }
 
     /**
-     * @name                  setShipmentRates ()
-     *                                         Sets the shipment_rates property.
-     *                                         Updates the data only if stored value and value to be set are different.
+     * @param \BiberLtd\Bundle\ShipmentGatewayBundle\Entity\ShipmentRate $shipment_rates
      *
-     * @author          Can Berkol
-     *
-     * @since           1.0.0
-     * @version         1.0.0
-     *
-     * @use             $this->setModified()
-     *
-     * @param           mixed $shipment_rates
-     *
-     * @return          object                $this
+     * @return $this
      */
-    public function setShipmentRates($shipment_rates) {
+    public function setShipmentRates(\BiberLtd\Bundle\ShipmentGatewayBundle\Entity\ShipmentRate $shipment_rates) {
         if(!$this->setModified('shipment_rates', $shipment_rates)->isModified()) {
             return $this;
         }
@@ -229,37 +148,18 @@ class ShipmentGatewayRegion extends CoreEntity
     }
 
     /**
-     * @name            getShipmentRates ()
-     *                                   Returns the value of shipment_rates property.
-     *
-     * @author          Can Berkol
-     *
-     * @since           1.0.0
-     * @version         1.0.0
-     *
-     * @return          mixed           $this->shipment_rates
+     * @return \BiberLtd\Bundle\ShipmentGatewayBundle\Entity\ShipmentRate
      */
     public function getShipmentRates() {
         return $this->shipment_rates;
     }
 
     /**
-     * @name                  setState ()
-     *                                 Sets the state property.
-     *                                 Updates the data only if stored value and value to be set are different.
+     * @param \BiberLtd\Bundle\LocationManagementBundle\Entity\State $state
      *
-     * @author          Can Berkol
-     *
-     * @since           1.0.0
-     * @version         1.0.0
-     *
-     * @use             $this->setModified()
-     *
-     * @param           mixed $state
-     *
-     * @return          object                $this
+     * @return $this
      */
-    public function setState($state) {
+    public function setState(\BiberLtd\Bundle\LocationManagementBundle\Entity\State $state) {
         if(!$this->setModified('state', $state)->isModified()) {
             return $this;
         }
@@ -268,40 +168,10 @@ class ShipmentGatewayRegion extends CoreEntity
     }
 
     /**
-     * @name            getState ()
-     *                           Returns the value of state property.
-     *
-     * @author          Can Berkol
-     *
-     * @since           1.0.0
-     * @version         1.0.0
-     *
-     * @return          mixed           $this->state
+     * @return \BiberLtd\Bundle\LocationManagementBundle\Entity\State
      */
     public function getState() {
         return $this->state;
     }
 
 }
-/**
- * Change Log:
- * **************************************
- * v1.0.0                      Murat Ünal
- * 23.09.2013
- * **************************************
- * A getCity()
- * A getCountry()
- * A getGateway()
- * A getId()
- * A getShipmentGatewayRegion_localizations()
- * A getShipmentRates()
- * A getState()
- *
- * A setCity()
- * A setCountry()
- * A setGateway()
- * A setShipmentGatewayRegion_localizations()
- * A setShipmentRates()
- * A setState()
- *
- */

@@ -1,18 +1,11 @@
 <?php
 /**
- * @name        ShipmentGateway
- * @package		BiberLtd\Bundle\CoreBundle\ShipmentGatewayBundle
+ * @author		Can Berkol
  *
- * @author		Murat Ünal
+ * @copyright   Biber Ltd. (http://www.biberltd.com) (C) 2015
+ * @license     GPLv3
  *
- * @version     1.0.0
- * @date        23.09.2013
- *
- * @copyright   Biber Ltd. (http://www.biberltd.com)
- * @license     GPL v3.0
- *
- * @description Model / Entity class.
- *
+ * @date        26.12.2015
  */
 namespace BiberLtd\Bundle\ShipmentGatewayBundle\Entity;
 use Doctrine\ORM\Mapping AS ORM;
@@ -32,67 +25,48 @@ class ShipmentGateway extends CoreLocalizableEntity
      * @ORM\Id
      * @ORM\Column(type="integer", length=10)
      * @ORM\GeneratedValue(strategy="AUTO")
+     * @var int
      */
     private $id;
 
     /** 
      * @ORM\Column(type="datetime", nullable=false)
+     * @var \DateTime
      */
     public $date_added;
 
     /** 
      * @ORM\Column(type="text", nullable=true)
+     * @var string
      */
     private $settings;
 
     /** 
-     * @ORM\OneToMany(
-     *     targetEntity="BiberLtd\Bundle\ShipmentGatewayBundle\Entity\ShipmentGatewayLocalization",
-     *     mappedBy="shipment_gateway"
-     * )
+     * @ORM\OneToMany(targetEntity="ShipmentGatewayLocalization", mappedBy="shipment_gateway")
+     * @var array
      */
     protected $localizations;
 
     /** 
      * @ORM\ManyToOne(targetEntity="BiberLtd\Bundle\SiteManagementBundle\Entity\Site")
      * @ORM\JoinColumn(name="site", referencedColumnName="id", nullable=false, onDelete="CASCADE")
+     * @var \BiberLtd\Bundle\SiteManagementBundle\Entity\Site
      */
     private $site;
-    /******************************************************************
-     * PUBLIC SET AND GET FUNCTIONS                                   *
-     ******************************************************************/
 
     /**
-     * @name            getId()
-     *  				Gets $id property.
-     * .
-     * @author          Murat Ünal
-     * @since			1.0.0
-     * @version         1.0.0
-     *
-     * @return          string          $this->id
+     * @return mixed
      */
     public function getId(){
         return $this->id;
     }
 
     /**
-     * @name                  setSettings ()
-     *                                    Sets the settings property.
-     *                                    Updates the data only if stored value and value to be set are different.
+     * @param string $settings
      *
-     * @author          Can Berkol
-     *
-     * @since           1.0.0
-     * @version         1.0.0
-     *
-     * @use             $this->setModified()
-     *
-     * @param           mixed $settings
-     *
-     * @return          object                $this
+     * @return $this
      */
-    public function setSettings($settings) {
+    public function setSettings(\string $settings) {
         if(!$this->setModified('settings', $settings)->isModified()) {
             return $this;
         }
@@ -101,37 +75,18 @@ class ShipmentGateway extends CoreLocalizableEntity
     }
 
     /**
-     * @name            getSettings ()
-     *                              Returns the value of settings property.
-     *
-     * @author          Can Berkol
-     *
-     * @since           1.0.0
-     * @version         1.0.0
-     *
-     * @return          mixed           $this->settings
+     * @return string
      */
     public function getSettings() {
         return $this->settings;
     }
 
     /**
-     * @name                  setSite ()
-     *                                Sets the site property.
-     *                                Updates the data only if stored value and value to be set are different.
+     * @param \BiberLtd\Bundle\SiteManagementBundle\Entity\Site $site
      *
-     * @author          Can Berkol
-     *
-     * @since           1.0.0
-     * @version         1.0.0
-     *
-     * @use             $this->setModified()
-     *
-     * @param           mixed $site
-     *
-     * @return          object                $this
+     * @return $this
      */
-    public function setSite($site) {
+    public function setSite(\BiberLtd\Bundle\SiteManagementBundle\Entity\Site $site) {
         if(!$this->setModified('site', $site)->isModified()) {
             return $this;
         }
@@ -140,35 +95,9 @@ class ShipmentGateway extends CoreLocalizableEntity
     }
 
     /**
-     * @name            getSite ()
-     *                          Returns the value of site property.
-     *
-     * @author          Can Berkol
-     *
-     * @since           1.0.0
-     * @version         1.0.0
-     *
-     * @return          mixed           $this->site
+     * @return \BiberLtd\Bundle\SiteManagementBundle\Entity\Site
      */
     public function getSite() {
         return $this->site;
     }
 }
-/**
- * Change Log:
- * **************************************
- * v1.0.0                      Murat Ünal
- * 23.09.2013
- * **************************************
- * A getDateAdded()
- * A getId()
- * A getLocalizations()
- * A getSettings()
- * A getSite()
- *
- * A setDateAdded()
- * A setLocalizations()
- * A setSettings()
- * A setSite()
- *
- */

@@ -1,3 +1,0 @@
-biberltd_core_shipment_gateway_manage:
-    pattern:  /shipment
-    defaults: { _controller: BiberLtdCoreBundlesShipmentGatewayBundle:Test:test }

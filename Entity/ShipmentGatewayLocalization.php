@@ -1,18 +1,11 @@
 <?php
 /**
- * @name        ShipmentGatewayLocalization
- * @package		BiberLtd\Bundle\CoreBundle\ShipmentGatewayBundle
+ * @author		Can Berkol
  *
- * @author		Murat Ünal
+ * @copyright   Biber Ltd. (http://www.biberltd.com) (C) 2015
+ * @license     GPLv3
  *
- * @version     1.0.0
- * @date        23.09.2013
- *
- * @copyright   Biber Ltd. (http://www.biberltd.com)
- * @license     GPL v3.0
- *
- * @description Model / Entity class.
- *
+ * @date        26.12.2015
  */
 namespace BiberLtd\Bundle\ShipmentGatewayBundle\Entity;
 use Doctrine\ORM\Mapping AS ORM;
@@ -32,26 +25,27 @@ class ShipmentGatewayLocalization extends CoreEntity
 {
     /** 
      * @ORM\Column(type="string", length=155, nullable=false)
+     * @var string
      */
     private $name;
 
     /** 
      * @ORM\Column(type="string", length=255, nullable=false)
+     * @var string
      */
     private $url_key;
 
     /** 
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @var string
      */
     private $description;
 
     /** 
      * @ORM\Id
-     * @ORM\ManyToOne(
-     *     targetEntity="BiberLtd\Bundle\ShipmentGatewayBundle\Entity\ShipmentGateway",
-     *     inversedBy="localizations"
-     * )
+     * @ORM\ManyToOne(targetEntity="ShipmentGateway", inversedBy="localizations")
      * @ORM\JoinColumn(name="gateway", referencedColumnName="id", nullable=false, onDelete="CASCADE")
+     * @var \BiberLtd\Bundle\ShipmentGatewayBundle\Entity\ShipmentGateway
      */
     private $shipment_gateway;
 
@@ -59,26 +53,16 @@ class ShipmentGatewayLocalization extends CoreEntity
      * @ORM\Id
      * @ORM\ManyToOne(targetEntity="BiberLtd\Bundle\MultiLanguageSupportBundle\Entity\Language")
      * @ORM\JoinColumn(name="language", referencedColumnName="id", nullable=false, onDelete="CASCADE")
+     * @var \BiberLtd\Bundle\MultiLanguageSupportBundle\Entity\Language
      */
     private $language;
 
     /**
-     * @name                  setDescription ()
-     *                                       Sets the description property.
-     *                                       Updates the data only if stored value and value to be set are different.
+     * @param string $description
      *
-     * @author          Can Berkol
-     *
-     * @since           1.0.0
-     * @version         1.0.0
-     *
-     * @use             $this->setModified()
-     *
-     * @param           mixed $description
-     *
-     * @return          object                $this
+     * @return $this
      */
-    public function setDescription($description) {
+    public function setDescription(\string $description) {
         if(!$this->setModified('description', $description)->isModified()) {
             return $this;
         }
@@ -87,37 +71,18 @@ class ShipmentGatewayLocalization extends CoreEntity
     }
 
     /**
-     * @name            getDescription ()
-     *                                 Returns the value of description property.
-     *
-     * @author          Can Berkol
-     *
-     * @since           1.0.0
-     * @version         1.0.0
-     *
-     * @return          mixed           $this->description
+     * @return string
      */
     public function getDescription() {
         return $this->description;
     }
 
     /**
-     * @name                  setLanguage ()
-     *                                    Sets the language property.
-     *                                    Updates the data only if stored value and value to be set are different.
+     * @param \BiberLtd\Bundle\MultiLanguageSupportBundle\Entity\Language $language
      *
-     * @author          Can Berkol
-     *
-     * @since           1.0.0
-     * @version         1.0.0
-     *
-     * @use             $this->setModified()
-     *
-     * @param           mixed $language
-     *
-     * @return          object                $this
+     * @return $this
      */
-    public function setLanguage($language) {
+    public function setLanguage(\BiberLtd\Bundle\MultiLanguageSupportBundle\Entity\Language $language) {
         if(!$this->setModified('language', $language)->isModified()) {
             return $this;
         }
@@ -126,37 +91,18 @@ class ShipmentGatewayLocalization extends CoreEntity
     }
 
     /**
-     * @name            getLanguage ()
-     *                              Returns the value of language property.
-     *
-     * @author          Can Berkol
-     *
-     * @since           1.0.0
-     * @version         1.0.0
-     *
-     * @return          mixed           $this->language
+     * @return \BiberLtd\Bundle\MultiLanguageSupportBundle\Entity\Language
      */
     public function getLanguage() {
         return $this->language;
     }
 
     /**
-     * @name                  setName ()
-     *                                Sets the name property.
-     *                                Updates the data only if stored value and value to be set are different.
+     * @param string $name
      *
-     * @author          Can Berkol
-     *
-     * @since           1.0.0
-     * @version         1.0.0
-     *
-     * @use             $this->setModified()
-     *
-     * @param           mixed $name
-     *
-     * @return          object                $this
+     * @return $this
      */
-    public function setName($name) {
+    public function setName(\string $name) {
         if(!$this->setModified('name', $name)->isModified()) {
             return $this;
         }
@@ -165,37 +111,18 @@ class ShipmentGatewayLocalization extends CoreEntity
     }
 
     /**
-     * @name            getName ()
-     *                          Returns the value of name property.
-     *
-     * @author          Can Berkol
-     *
-     * @since           1.0.0
-     * @version         1.0.0
-     *
-     * @return          mixed           $this->name
+     * @return string
      */
     public function getName() {
         return $this->name;
     }
 
     /**
-     * @name                  setShipmentGateway ()
-     *                                           Sets the shipment_gateway property.
-     *                                           Updates the data only if stored value and value to be set are different.
+     * @param \BiberLtd\Bundle\ShipmentGatewayBundle\Entity\ShipmentGateway $shipment_gateway
      *
-     * @author          Can Berkol
-     *
-     * @since           1.0.0
-     * @version         1.0.0
-     *
-     * @use             $this->setModified()
-     *
-     * @param           mixed $shipment_gateway
-     *
-     * @return          object                $this
+     * @return $this
      */
-    public function setShipmentGateway($shipment_gateway) {
+    public function setShipmentGateway(\BiberLtd\Bundle\ShipmentGatewayBundle\Entity\ShipmentGateway $shipment_gateway) {
         if(!$this->setModified('shipment_gateway', $shipment_gateway)->isModified()) {
             return $this;
         }
@@ -204,37 +131,18 @@ class ShipmentGatewayLocalization extends CoreEntity
     }
 
     /**
-     * @name            getShipmentGateway ()
-     *                                     Returns the value of shipment_gateway property.
-     *
-     * @author          Can Berkol
-     *
-     * @since           1.0.0
-     * @version         1.0.0
-     *
-     * @return          mixed           $this->shipment_gateway
+     * @return \BiberLtd\Bundle\ShipmentGatewayBundle\Entity\ShipmentGateway
      */
     public function getShipmentGateway() {
         return $this->shipment_gateway;
     }
 
     /**
-     * @name                  setUrlKey ()
-     *                                  Sets the url_key property.
-     *                                  Updates the data only if stored value and value to be set are different.
+     * @param string $url_key
      *
-     * @author          Can Berkol
-     *
-     * @since           1.0.0
-     * @version         1.0.0
-     *
-     * @use             $this->setModified()
-     *
-     * @param           mixed $url_key
-     *
-     * @return          object                $this
+     * @return $this
      */
-    public function setUrlKey($url_key) {
+    public function setUrlKey(\string $url_key) {
         if(!$this->setModified('url_key', $url_key)->isModified()) {
             return $this;
         }
@@ -243,40 +151,9 @@ class ShipmentGatewayLocalization extends CoreEntity
     }
 
     /**
-     * @name            getUrlKey ()
-     *                            Returns the value of url_key property.
-     *
-     * @author          Can Berkol
-     *
-     * @since           1.0.0
-     * @version         1.0.0
-     *
-     * @return          mixed           $this->url_key
+     * @return string
      */
     public function getUrlKey() {
         return $this->url_key;
     }
-    /******************************************************************
-     * PUBLIC SET AND GET FUNCTIONS                                   *
-     ******************************************************************/
-
 }
-/**
- * Change Log:
- * **************************************
- * v1.0.0                      Murat Ünal
- * 23.09.2013
- * **************************************
- * A getDescription()
- * A getLanguage()
- * A getName()
- * A getShipmentGateway()
- * A getUrlKey()
- *
- * A setDescription()
- * A setLanguage()
- * A setName()
- * A setShipmentGateway()
- * A setUrlKey()
- *
- */

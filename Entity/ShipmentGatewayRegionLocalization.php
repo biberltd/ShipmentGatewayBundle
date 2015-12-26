@@ -1,18 +1,11 @@
 <?php
 /**
- * @name        ShipmentGatewayRegionLocalization
- * @package		BiberLtd\Bundle\CoreBundle\ShipmentGatewayBundle
+ * @author		Can Berkol
  *
- * @author		Murat Ünal
+ * @copyright   Biber Ltd. (http://www.biberltd.com) (C) 2015
+ * @license     GPLv3
  *
- * @version     1.0.0
- * @date        23.09.2013
- *
- * @copyright   Biber Ltd. (http://www.biberltd.com)
- * @license     GPL v3.0
- *
- * @description Model / Entity class.
- *
+ * @date        26.12.2015
  */
 namespace BiberLtd\Bundle\ShipmentGatewayBundle\Entity;
 use Doctrine\ORM\Mapping AS ORM;
@@ -32,87 +25,57 @@ class ShipmentGatewayRegionLocalization extends CoreEntity
 {
     /** 
      * @ORM\Column(type="string", length=155, nullable=false)
+     * @var string
      */
     private $name;
 
     /** 
      * @ORM\Column(type="string", length=255, nullable=false)
+     * @var string
      */
     private $url_key;
 
-    /** 
-     * @ORM\Id
-     * @ORM\ManyToOne(
-     *     targetEntity="BiberLtd\Bundle\ShipmentGatewayBundle\Entity\ShipmentGatewayRegion",
-     *     inversedBy="localizations"
-     * )
-     * @ORM\JoinColumn(name="region", referencedColumnName="id", nullable=false, onDelete="CASCADE")
-     */
-    private $shipment_gateway_regions;
-
-    /** 
+    /**
      * @ORM\Id
      * @ORM\ManyToOne(targetEntity="BiberLtd\Bundle\MultiLanguageSupportBundle\Entity\Language")
      * @ORM\JoinColumn(name="language", referencedColumnName="id", nullable=false, onDelete="CASCADE")
+     * @var \BiberLtd\Bundle\MultiLanguageSupportBundle\Entity\Language
      */
-    private $languages;
+    private $language;
 
     /**
-     * @name                  setLanguages ()
-     *                                     Sets the languages property.
-     *                                     Updates the data only if stored value and value to be set are different.
-     *
-     * @author          Can Berkol
-     *
-     * @since           1.0.0
-     * @version         1.0.0
-     *
-     * @use             $this->setModified()
-     *
-     * @param           mixed $languages
-     *
-     * @return          object                $this
+     * @ORM\Id
+     * @ORM\ManyToOne(targetEntity="ShipmentGatewayRegion", inversedBy="localizations")
+     * @ORM\JoinColumn(name="region", referencedColumnName="id", nullable=false, onDelete="CASCADE")
      */
-    public function setLanguages($languages) {
-        if(!$this->setModified('languages', $languages)->isModified()) {
+    private $shipment_gateway_region;
+
+    /**
+     * @param \BiberLtd\Bundle\MultiLanguageSupportBundle\Entity\Language $language
+     *
+     * @return $this
+     */
+    public function setLanguage(\BiberLtd\Bundle\MultiLanguageSupportBundle\Entity\Language $language) {
+        if(!$this->setModified('languages', $language)->isModified()) {
             return $this;
         }
-		$this->languages = $languages;
+		$this->language = $languages;
 		return $this;
     }
 
     /**
-     * @name            getLanguages ()
-     *                               Returns the value of languages property.
-     *
-     * @author          Can Berkol
-     *
-     * @since           1.0.0
-     * @version         1.0.0
-     *
-     * @return          mixed           $this->languages
+     * @return \BiberLtd\Bundle\MultiLanguageSupportBundle\Entity\Language
      */
-    public function getLanguages() {
-        return $this->languages;
+    public function getLanguage() {
+        return $this->language;
     }
 
     /**
-     * @name                  setName ()
-     *                                Sets the name property.
-     *                                Updates the data only if stored value and value to be set are different.
+     * @param string $name
      *
-     * @author          Can Berkol
-     *
-     * @since           1.0.0
-     * @version         1.0.0
-     *
-     * @use             $this->setModified()
-     *
-     * @param           mixed $name
-     *
-     * @return          object                $this
+     * @return $this
      */
-    public function setName($name) {
+    public function setName(\string $name) {
         if(!$this->setModified('name', $name)->isModified()) {
             return $this;
         }
@@ -121,76 +84,38 @@ class ShipmentGatewayRegionLocalization extends CoreEntity
     }
 
     /**
-     * @name            getName ()
-     *                          Returns the value of name property.
-     *
-     * @author          Can Berkol
-     *
-     * @since           1.0.0
-     * @version         1.0.0
-     *
-     * @return          mixed           $this->name
+     * @return string
      */
     public function getName() {
         return $this->name;
     }
 
     /**
-     * @name                  setShipmentGatewayRegions ()
-     *                                                  Sets the shipment_gateway_regions property.
-     *                                                  Updates the data only if stored value and value to be set are different.
+     * @param \BiberLtd\Bundle\ShipmentGatewayBundle\Entity\ShipmentGatewayRegion $shipment_gateway_regions
      *
-     * @author          Can Berkol
-     *
-     * @since           1.0.0
-     * @version         1.0.0
-     *
-     * @use             $this->setModified()
-     *
-     * @param           mixed $shipment_gateway_regions
-     *
-     * @return          object                $this
+     * @return $this
      */
-    public function setShipmentGatewayRegions($shipment_gateway_regions) {
-        if(!$this->setModified('shipment_gateway_regions', $shipment_gateway_regions)->isModified()) {
+    public function setShipmentGatewayRegion(\BiberLtd\Bundle\ShipmentGatewayBundle\Entity\ShipmentGatewayRegion $shipment_gateway_regions) {
+        if(!$this->setModified('shipment_gateway_region', $shipment_gateway_regions)->isModified()) {
             return $this;
         }
-		$this->shipment_gateway_regions = $shipment_gateway_regions;
+		$this->shipment_gateway_region = $shipment_gateway_regions;
 		return $this;
     }
 
     /**
-     * @name            getShipmentGatewayRegions ()
-     *                                            Returns the value of shipment_gateway_regions property.
-     *
-     * @author          Can Berkol
-     *
-     * @since           1.0.0
-     * @version         1.0.0
-     *
-     * @return          mixed           $this->shipment_gateway_regions
+     * @return mixed
      */
-    public function getShipmentGatewayRegions() {
-        return $this->shipment_gateway_regions;
+    public function getShipmentGatewayRegion() {
+        return $this->shipment_gateway_region;
     }
 
     /**
-     * @name                  setUrlKey ()
-     *                                  Sets the url_key property.
-     *                                  Updates the data only if stored value and value to be set are different.
+     * @param string $url_key
      *
-     * @author          Can Berkol
-     *
-     * @since           1.0.0
-     * @version         1.0.0
-     *
-     * @use             $this->setModified()
-     *
-     * @param           mixed $url_key
-     *
-     * @return          object                $this
+     * @return $this
      */
-    public function setUrlKey($url_key) {
+    public function setUrlKey(\string $url_key) {
         if(!$this->setModified('url_key', $url_key)->isModified()) {
             return $this;
         }
@@ -199,38 +124,9 @@ class ShipmentGatewayRegionLocalization extends CoreEntity
     }
 
     /**
-     * @name            getUrlKey ()
-     *                            Returns the value of url_key property.
-     *
-     * @author          Can Berkol
-     *
-     * @since           1.0.0
-     * @version         1.0.0
-     *
-     * @return          mixed           $this->url_key
+     * @return string
      */
     public function getUrlKey() {
         return $this->url_key;
     }
-    /******************************************************************
-     * PUBLIC SET AND GET FUNCTIONS                                   *
-     ******************************************************************/
-
 }
-/**
- * Change Log:
- * **************************************
- * v1.0.0                      Murat Ünal
- * 23.09.2013
- * **************************************
- * A getLanguages()
- * A getName()
- * A getShipmentGatewayRegions()
- * A getUrlKey()
- *
- * A setLanguages()
- * A setName()
- * A setShipmentGatewayRegions()
- * A setUrlKey()
- *
- */

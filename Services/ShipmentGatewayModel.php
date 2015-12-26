@@ -1,92 +1,50 @@
 <?php
 /**
- * ShipmentGatewayModel Class
+ * @author		Can Berkol
  *
- * This class acts as a database proxy model for ShipmentGatewayBundle functionalities.
+ * @copyright   Biber Ltd. (http://www.biberltd.com) (C) 2015
+ * @license     GPLv3
  *
- * @vendor      BiberLtd
- * @package     Core\Bundles\ShipmentGatewayModel
- * @subpackage  Services
- * @name        ShipmentGatewayModel
- *
- * @author      Said İmamoğlu
- *
- * @copyright   Biber Ltd. (www.biberltd.com)
- *
- * @version     1.0.0
- * @date        19.03.2014
- *
- * @use         Biberltd\Core\Services
- * @use         Biberltd\Core\CoreModel
- * @use         Biberltd\Core\Services\Encryption
- * @use         BiberLtd\Bundle\ShipmentGatewayBundle\Entity
- * @use         BiberLtd\Bundle\ShipmentGatewayBundle\Services
- *
+ * @date        26.12.2015
  */
 namespace BiberLtd\Bundle\ShipmentGatewayBundle\Services;
 
-/** Extends CoreModel */
-use BiberLtd\Bundle\LocationManagementBundle\Services\LocationManagementModel;
 use BiberLtd\Bundle\CoreBundle\CoreModel;
-/** Entities to be used */
 use BiberLtd\Bundle\ShipmentGatewayBundle\Entity as BundleEntity;
-/** Helper Models */
 use BiberLtd\Bundle\SiteManagementBundle\Services as SMMService;
 use BiberLtd\Bundle\MultiLanguageSupportBundle\Services as MLSService;
-/** Core Service */
 use BiberLtd\Bundle\CoreBundle\Services as CoreServices;
 use BiberLtd\Bundle\CoreBundle\Exceptions as CoreExceptions;
+use BiberLtd\Bundle\CoreBundle\Responses\ModelResponse;
 
 class ShipmentGatewayModel extends CoreModel {
-
-    public $by_opts = array('entity', 'id', 'code', 'url_key', 'post');
     public $entity = array(
-            'shipment_gateway' => array('name' => 'ShipmentGatewayBundle:ShipmentGateway', 'alias' => 'sg'),
-            'shipment_gateway_localization' => array('name' => 'ShipmentGatewayBundle:ShipmentGatewayLocalization', 'alias' => 'sgl'),
-            'shipment_gateway_region' => array('name' => 'ShipmentGatewayBundle:ShipmentGateway', 'alias' => 'sgr'),
-            'shipment_gateway_region_localization' => array('name' => 'ShipmentGatewayBundle:ShipmentGatewayLocalization', 'alias' => 'sgrl'),
+            'sg' => array('name' => 'ShipmentGatewayBundle:ShipmentGateway', 'alias' => 'sg'),
+            'sgl' => array('name' => 'ShipmentGatewayBundle:ShipmentGatewayLocalization', 'alias' => 'sgl'),
+            'sgr' => array('name' => 'ShipmentGatewayBundle:ShipmentGateway', 'alias' => 'sgr'),
+            'sgrl' => array('name' => 'ShipmentGatewayBundle:ShipmentGatewayLocalization', 'alias' => 'sgrl'),
         );
 
     /**
-     * @name        deleteShipmentGateway ()
-     * Deletes an existing item from database.
+     * @param mixed $item
      *
-     * @since            1.0.0
-     * @version         1.0.0
-     * @author          Said İmamoğlu
-     *
-     * @use             $this->deleteShipmentGateways()
-     *
-     * @param           mixed $item Entity, id or url key of item
-     * @param           string $by
-     *
-     * @return          mixed           $response
+     * @return array
      */
-    public function deleteShipmentGateway($item, $by = 'entity')
+    public function deleteShipmentGateway($item)
     {
-        return $this->deleteShipmentGateways(array($item), $by);
+        return $this->deleteShipmentGateways(array($item));
     }
 
     /**
-     * @name            deleteShipmentGateways ()
-     * Deletes provided items from database.
+     * @param array $collection
      *
-     * @since        1.0.0
-     * @version         1.0.0
-     * @author          Said İmamoğlu
-     *
-     * @use             $this->createException()
-     *
-     * @param           array $collection Collection of ShipmentGateway entities, ids, or codes or url keys
-     *
-     * @return          array           $response
+     * @return \BiberLtd\Bundle\CoreBundle\Responses\ModelResponse
      */
-    public function deleteShipmentGateways($collection)
+    public function deleteShipmentGateways(array $collection)
     {
-        $this->resetResponse();
-        /** Parameter must be an array */
+        $timeStamp = time();
         if (!is_array($collection)) {
-            return $this->createException('InvalidParameterValue', 'Array', 'err.invalid.parameter.collection');
+            return $this->createException('InvalidParameterValueException', 'Invalid parameter value. Parameter must be an array collection', 'E:S:001');
         }
         $countDeleted = 0;
         foreach ($collection as $entry) {
@@ -94,316 +52,217 @@ class ShipmentGatewayModel extends CoreModel {
                 $this->em->remove($entry);
                 $countDeleted++;
             } else {
-                switch ($entry) {
-                    case is_numeric($entry):
-                        $response = $this->getShipmentGateway($entry, 'id');
-                        break;
-                    case is_string($entry):
-                        $response = $this->getProductCategory($entry, 'url_key');
-                        break;
+                $response = $this->getShipmentGateway($entry);
+                if (!$response->error->exist) {
+                    $this->em->remove($response->result->set);
+                    $countDeleted++;
                 }
-                if ($response['error']) {
-                    $this->createException('EntryDoesNotExist', $entry, 'err.invalid.entry');
-                }
-                $entry = $response['result']['set'];
-                $this->em->remove($entry);
-                $countDeleted++;
             }
         }
-
         if ($countDeleted < 0) {
-            $this->response['error'] = true;
-            $this->response['code'] = 'err.db.fail.delete';
-
-            return $this->response;
+            return new ModelResponse(null, 0, 0, null, true, 'E:E:001', 'Unable to delete all or some of the selected entries.', $timeStamp, time());
         }
         $this->em->flush();
-        $this->response = array(
-            'rowCount' => 0,
-            'result' => array(
-                'set' => null,
-                'total_rows' => $countDeleted,
-                'last_insert_id' => null,
-            ),
-            'error' => false,
-            'code' => 'scc.db.deleted',
-        );
-        return $this->response;
+        return new ModelResponse(null, 0, 0, null, false, 'S:D:001', 'Selected entries have been successfully removed from database.', $timeStamp, time());
     }
 
     /**
-     * @name            listShipmentGateways ()
-     * Lists shipment_gateway data from database with given params.
+     * @param array|null $filter
+     * @param array|null $sortOrder
+     * @param array|null $limit
      *
-     * @author          Said İmamoğlu
-     * @version         1.0.0
-     * @since           1.0.0
-     *
-     * @param           array $filter
-     * @param           array $sortOrder
-     * @param           array $limit
-     * @param           string $queryStr
-     *
-     * @use             $this->createException()
-     * @use             $this->prepareWhere()
-     * @use             $this->addLimit()
-     *
-     * @return          array $this->response
+     * @return array|\BiberLtd\Bundle\CoreBundle\Responses\ModelResponse
      */
-    public function listShipmentGateways($filter = null, $sortOrder = null, $limit = null, $queryStr = null)
+    public function listShipmentGateways(array $filter = null, array $sortOrder = null, array$limit = null)
     {
-        $this->resetResponse();
+        $timeStamp = time();
         if (!is_array($sortOrder) && !is_null($sortOrder)) {
-            return $this->createException('InvalidSortOrder', '', 'err.invalid.parameter.sortorder');
+            return $this->createException('InvalidSortOrderException', '$sortOrder must be an array with key => value pairs where value can only be "asc" or "desc".', 'E:S:002');
         }
+        $oStr = $wStr = $gStr = $fStr = '';
 
-        $order_str = '';
-        $where_str = '';
-        $group_str = '';
-        $filter_str = '';
+        $qStr = 'SELECT ' . $this->entity['sg']['alias']
+            . ' FROM ' . $this->entity['sgl']['name'] . ' ' . $this->entity['sgl']['alias']
+            . ' JOIN ' . $this->entity['sgl']['alias'] . '.gateway ' . $this->entity['sg']['alias'];
 
-        /**
-         * Start creating the query.
-         *
-         * Note that if no custom select query is provided we will use the below query as a start.
-         */
-        if (is_null($queryStr)) {
-            $queryStr = 'SELECT ' . $this->entity['shipment_gateway']['alias']
-                . ' FROM ' . $this->entity['shipment_gateway']['name'] . ' ' . $this->entity['shipment_gateway']['alias'];
-        }
-        /**
-         * Prepare ORDER BY section of query.
-         */
-        if ($sortOrder != null) {
+        if (!is_null($sortOrder)) {
             foreach ($sortOrder as $column => $direction) {
-                $order_str .= ' ' . $this->entity['shipment_gateway']['alias'] . '.' . $column . ' ' . strtoupper($direction) . ', ';
+                switch ($column) {
+                    case 'id':
+                    case 'date_added':
+                    case 'site':
+                        $column = $this->entity['sg']['alias'] . '.' . $column;
+                        break;
+                    case 'name':
+                    case 'description':
+                    case 'url_key':
+
+                        $column = $this->entity['sgl']['alias'] . '.' . $column;
+                        break;
+                }
+                $oStr .= ' ' . $column . ' ' . strtoupper($direction) . ', ';
             }
-            $order_str = rtrim($order_str, ', ');
-            $order_str = ' ORDER BY ' . $order_str . ' ';
+            $oStr = rtrim($oStr, ', ');
+            $oStr = ' ORDER BY ' . $oStr . ' ';
         }
 
-        /**
-         * Prepare WHERE section of query.
-         */
-        if ($filter != null) {
-            $filter_str = $this->prepareWhere($filter);
-            $where_str .= ' WHERE ' . $filter_str;
+        if (!is_null($filter)) {
+            $fStr = $this->prepareWhere($filter);
+            $wStr .= ' WHERE ' . $fStr;
         }
-        $queryStr .= $where_str . $group_str . $order_str;
 
-        $query = $this->em->createQuery($queryStr);
+        $qStr .= $wStr . $gStr . $oStr;
+        $q = $this->em->createQuery($qStr);
+        $q = $this->addLimit($q, $limit);
 
-        $query = $this->addLimit($query, $limit);
-        /**
-         * Prepare & Return Response
-         */
-        $result = $query->getResult();
-        $shipmentGateways = array();
-        $unique = array();
+        $result = $q->getResult();
+
+        $entities = array();
         foreach ($result as $entry) {
-            $id = $entry->getId();
+            /**
+             * @var \BiberLtd\Bundle\ShipmentGatewayBundle\Entity\ShipmentGatewayLocalization $entry
+             */
+            $id = $entry->getShipmentGateway()->getId();
             if (!isset($unique[$id])) {
-                $shipmentGateways[$id] = $entry;
-                $unique[$id] = $entry->getId();
+                $unique[$id] = '';
+                $entities[] = $entry->getShipmentGateway();
             }
         }
-
-        $total_rows = count($shipmentGateways);
-
-        if ($total_rows < 1) {
-            $this->response['code'] = 'err.db.entry.notexist';
-            return $this->response;
+        $totalRows = count($entities);
+        if ($totalRows < 1) {
+            return new ModelResponse(null, 0, 0, null, true, 'E:D:002', 'No entries found in database that matches to your criterion.', $timeStamp, time());
         }
-        $newCollection = array();
-        foreach ($shipmentGateways as $stock) {
-            $newCollection[] = $stock;
-        }
-        unset($shipmentGateways, $unique);
-
-        $this->response = array(
-            'rowCount' => $this->response['rowCount'],
-            'result' => array(
-                'set' => $newCollection,
-                'total_rows' => $total_rows,
-                'last_insert_id' => null,
-            ),
-            'error' => false,
-            'code' => 'scc.db.entry.exist',
-        );
-        return $this->response;
+        return new ModelResponse($entities, $totalRows, 0, null, false, 'S:D:002', 'Entries successfully fetched from database.', $timeStamp, time());
     }
 
     /**
-     * @name        getShipmentGateway ()
-     * Returns details of a gallery.
+     * @param mixed $gateway
      *
-     * @since        1.0.0
-     * @version         1.0.0
-     * @author          Said İmamoğlu
-     *
-     * @use             $this->createException()
-     * @use             $this->listShipmentGateways()
-     *
-     * @param           mixed $stock id, url_key
-     * @param           string $by entity, id, url_key
-     *
-     * @return          mixed           $response
+     * @return ModelResponse
      */
-    public function getShipmentGateway($stock, $by = 'id')
+    public function getShipmentGateway($gateway)
     {
-        $this->resetResponse();
-        $by_opts = array('id', 'sku', 'product');
-        if (!in_array($by, $by_opts)) {
-            return $this->createException('InvalidParameterValue', implode(',', $by_opts), 'err.invalid.parameter.by');
+        $timeStamp = time();
+        if ($gateway instanceof BundleEntity\ShipmentGateway) {
+            return new ModelResponse($gateway, 1, 0, null, false, 'S:D:002', 'Entries successfully fetched from database.', $timeStamp, time());
         }
-        if (!is_object($stock) && !is_numeric($stock) && !is_string($stock)) {
-            return $this->createException('InvalidParameter', 'ProductCategory or numeric id', 'err.invalid.parameter.product_category');
+        $result = null;
+        switch ($gateway) {
+            case is_numeric($gateway):
+                $result = $this->em->getRepository($this->entity['sg']['name'])->findOneBy(array('id' => $gateway));
+                break;
+            case is_string($gateway):
+                $response = $this->getShipmentGatewayByUrlKey($gateway);
+                if ($response->error->exist) {
+                    return $response;
+                }
+                $result = $response->result->set;
+                unset($response);
+                break;
         }
-        if (is_object($stock)) {
-            if (!$stock instanceof BundleEntity\ShipmentGateway) {
-                return $this->createException('InvalidParameter', 'ProductCategory', 'err.invalid.parameter.product_category');
-            }
-            /**
-             * Prepare & Return Response
-             */
-            $this->response = array(
-                'rowCount' => $this->response['rowCount'],
-                'result' => array(
-                    'set' => $stock,
-                    'total_rows' => 1,
-                    'last_insert_id' => null,
-                ),
-                'error' => false,
-                'code' => 'scc.db.entry.exist',
-            );
-            return $this->response;
+        if (is_null($result)) {
+            return new ModelResponse($result, 0, 0, null, true, 'E:D:002', 'Unable to find request entry in database.', $timeStamp, time());
         }
-        $column = '';
+
+        return new ModelResponse($result, 1, 0, null, false, 'S:D:002', 'Entries successfully fetched from database.', $timeStamp, time());
+    }
+
+    /**
+     * @param string $urlKey
+     * @param mixed|null $language
+     *
+     * @return \BiberLtd\Bundle\CoreBundle\Responses\ModelResponse
+     */
+    public function getShipmentGatewayByUrlKey(\string $urlKey, $language = null)
+    {
+        $timeStamp = time();
+        if (!is_string($urlKey)) {
+            return $this->createException('InvalidParameterValueException', '$urlKey must be a string.', 'E:S:007');
+        }
         $filter[] = array(
             'glue' => 'and',
             'condition' => array(
                 array(
                     'glue' => 'and',
-                    'condition' => array('column' => $this->entity['shipment_gateway']['alias'] . '.' . $by, 'comparison' => '=', 'value' => $stock),
+                    'condition' => array('column' => $this->entity['sgl']['alias'] . '.url_key', 'comparison' => '=', 'value' => $urlKey),
                 )
             )
         );
-        $response = $this->listShipmentGateways($filter, null, null, null, false);
-        if ($response['error']) {
+        if (!is_null($language)) {
+            /**
+             * @var \BiberLtd\Bundle\MultiLanguageSupportBundle\Services\MultiLanguageSupportModel @mModel
+             */
+            $mModel = $this->kernel->getContainer()->get('multilanguagesupport.model');
+            $response = $mModel->getLanguage($language);
+            if (!$response->error->exist) {
+                $filter[] = array(
+                    'glue' => 'and',
+                    'condition' => array(
+                        array(
+                            'glue' => 'and',
+                            'condition' => array('column' => $this->entity['sgl']['alias'] . '.language', 'comparison' => '=', 'value' => $response->result->set->getId()),
+                        )
+                    )
+                );
+            }
+        }
+        $response = $this->listShipmentGateways($filter, null, array('start' => 0, 'count' => 1));
+        if ($response->error->exist) {
             return $response;
         }
-        $collection = $response['result']['set'];
-        /**
-         * Prepare & Return Response
-         */
-        $this->response = array(
-            'rowCount' => $this->response['rowCount'],
-            'result' => array(
-                'set' => $collection[0],
-                'total_rows' => 1,
-                'last_insert_id' => null,
-            ),
-            'error' => false,
-            'code' => 'scc.db.entry.exist',
-        );
-        return $this->response;
+        $response->stats->execution->start = $timeStamp;
+        $response->stats->execution->end = time();
+        $response->result->set = $response->result->set[0];
+
+        return $response;
     }
 
     /**
+     * @param mixed $gateway
+     * @param bool $bypass
      *
-     * @name        doesShipmentGatewayExist ()
-     * Checks if entry exists in database.
-     *
-     * @since           1.0.0
-     * @version         1.0.0
-     * @author          Said İmamoğlu
-     *
-     * @use             $this->getShipmentGateway()
-     *
-     * @param           mixed $item id, url_key
-     * @param           string $by id, url_key
-     *
-     * @param           bool $bypass If set to true does not return response but only the result.
-     *
-     * @return          mixed           $response
+     * @return \BiberLtd\Bundle\CoreBundle\Responses\ModelResponse|bool
      */
-    public function doesShipmentGatewayExist($item, $by = 'id', $bypass = false)
+    public function doesShipmentGatewayExist($gateway, \bool $bypass = false)
     {
-        $this->resetResponse();
-        $exist = false;
-
-        $response = $this->getShipmentGateway($item, $by);
-
-        if (!$response['error'] && $response['result']['total_rows'] > 0) {
-            $exist = $response['result']['set'];
-            $error = false;
-        } else {
+        $response = $this->getShipmentGateway($gateway);
+        $exist = true;
+        if ($response->error->exist) {
             $exist = false;
-            $error = true;
+            $response->result->set = false;
         }
-
         if ($bypass) {
             return $exist;
         }
-        /**
-         * Prepare & Return Response
-         */
-        $this->response = array(
-            'rowCount' => $this->response['rowCount'],
-            'result' => array(
-                'set' => $exist,
-                'total_rows' => 1,
-                'last_insert_id' => null,
-            ),
-            'error' => $error,
-            'code' => 'scc.db.entry.exist',
-        );
-        return $this->response;
+        return $response;
     }
 
     /**
-     * @name        insertShipmentGateway ()
-     * Inserts one or more item into database.
+     * @param mixed $item
      *
-     * @since        1.0.1
-     * @version         1.0.3
-     * @author          Said İmamoğlu
-     *
-     * @use             $this->insertFiles()
-     *
-     * @param           array $item Collection of entities or post data.
-     *
-     * @return          array           $response
+     * @return array
      */
-
     public function insertShipmentGateway($item)
     {
-        $this->resetResponse();
         return $this->insertShipmentGateways(array($item));
     }
 
     /**
-     * @name            insertShipmentGateways ()
-     * Inserts one or more items into database.
+     * @param array $collection
      *
-     * @since           1.0.0
-     * @version         1.0.3
-     * @author          Said İmamoğlu
-     *
-     * @use             $this->createException()
-     *
-     * @throws          InvalidParameterException
-     * @throws          InvalidMethodException
-     *
-     * @param           array $collection Collection of entities or post data.
-     *
-     * @return          array           $response
+     * @return \BiberLtd\Bundle\CoreBundle\Responses\ModelResponse
      */
-
-    public function insertShipmentGateways($collection)
+    public function insertShipmentGateways(array $collection)
     {
+        $timeStamp = time();
+        if (!is_array($collection)) {
+            return $this->createException('InvalidParameterValueException', 'Invalid parameter value. Parameter must be an array collection', 'E:S:001');
+        }
         $countInserts = 0;
-        $countLocalizations=0;
+        $countLocalizations = 0;
+        $insertedItems = array();
+        $localizations = array();
+        $now = new \DateTime('now', new \DateTimeZone($this->kernel->getContainer()->getParameter('app_timezone')));
         foreach ($collection as $data) {
             if ($data instanceof BundleEntity\ShipmentGateway) {
                 $entity = $data;
@@ -411,11 +270,19 @@ class ShipmentGatewayModel extends CoreModel {
                 $insertedItems[] = $entity;
                 $countInserts++;
             } else if (is_object($data)) {
-                $localizations = array();
-                $locationModel = new LocationManagementModel($this->kernel);
+                unset($data->id);
                 $entity = new BundleEntity\ShipmentGateway();
+                if (!property_exists($data, 'date_added')) {
+                    $data->date_added = $now;
+                }
+                if (!property_exists($data, 'price')) {
+                    $data->price = 0;
+                }
+                if (!property_exists($data, 'site')) {
+                    $data->site = 1;
+                }
                 foreach ($data as $column => $value) {
-                    $localeSet=false;
+                    $localeSet = false;
                     $set = 'set' . $this->translateColumnName($column);
                     switch ($column) {
                         case 'local':
@@ -424,197 +291,162 @@ class ShipmentGatewayModel extends CoreModel {
                             $countLocalizations++;
                             break;
                         case 'site':
-                            $siteModel = $this->getContainer()->get('sitemanagement.model');
-                            $response = $siteModel->getSite($value,'id');
-                            if ($response['error']) {
-                                new CoreExceptions\EntityDoesNotExistException($this->kernel, 'Site can not found.');
+                            /**
+                             * @var \BiberLtd\Bundle\SiteManagementBundle\Services\SiteManagementModel $sModel
+                             */
+                            $sModel = $this->kernel->getContainer()->get('sitemanagement.model');
+                            $response = $sModel->getSite($value);
+                            if ($response->error->exist) {
+                                return $response;
                             }
-                            $entity->$set($response['result']['set']);
-                            unset($response,$siteModel);
+                            $entity->$set($response->result->set);
+                            unset($response, $sModel);
                             break;
-                        case 'date_added':
-                        case 'date_updated':
-                            new $entity->$set(\DateTime('now', new \DateTimeZone($this->kernel->getContainer()->getParameter('app_timezone'))));
+                        default:
+                            $entity->$set($value);
                             break;
                     }
                     if ($localeSet) {
                         $localizations[$countInserts]['entity'] = $entity;
                     }
                 }
-                unset($locationModel);
                 $this->em->persist($entity);
                 $insertedItems[] = $entity;
+
                 $countInserts++;
-            } else {
-                new CoreExceptions\InvalidDataException($this->kernel);
             }
-        }
-        /**
-         * Save data.
-         */
-        if ($countInserts > 0) {
-            $this->em->flush();
         }
         /** Now handle localizations */
         if ($countInserts > 0 && $countLocalizations > 0) {
+            $this->em->flush();
             $this->insertShipmentGatewayLocalizations($localizations);
-        }
-        /**
-         * Prepare & Return Response
-         */
-        $this->response = array(
-            'rowCount' => $this->response['rowCount'],
-            'result' => array(
-                'set' => $insertedItems,
-                'total_rows' => $countInserts,
-                'last_insert_id' => $entity->getId(),
-            ),
-            'error' => false,
-            'code' => 'scc.db.insert.done',
-        );
-        return $this->response;
-    }
-
-    /**
-     * @name            insertShipmentGatewayLocalizations ()
-     *                  Inserts one or more tax rate  localizations into database.
-     *
-     * @since           1.0.0
-     * @version         1.0.1
-     * @author          Said İmamoğlu
-     *
-     * @use             $this->createException()
-     *
-     * @param           array $collection Collection of entities or post data.
-     *
-     * @return          array           $response
-     */
-    public function insertShipmentGatewayLocalizations($collection)
-    {
-        $this->resetResponse();
-        /** Parameter must be an array */
-        if (!is_array($collection)) {
-            return $this->createException('InvalidParameter', 'Array', 'err.invalid.parameter.collection');
-        }
-        $countInserts = 0;
-        $insertedItems = array();
-        foreach ($collection as $item) {
-            if ($item instanceof BundleEntity\ShipmentGatewayLocalization) {
-                $entity = $item;
-                $this->em->persist($entity);
-                $insertedItems[] = $entity;
-                $countInserts++;
-            } else {
-                foreach ($item['localizations'] as $language => $data) {
-                    $entity = new BundleEntity\ShipmentGatewayLocalization;
-                    $entity->setShipmentGateway($item['entity']);
-                    $mlsModel = $this->kernel->getContainer()->get('multilanguagesupport.model');
-                    $response = $mlsModel->getLanguage($language, 'iso_code');
-                    if (!$response['error']) {
-                        $entity->setLanguage($response['result']['set']);
-                    } else {
-                        break 1;
-                    }
-                    foreach ($data as $column => $value) {
-                        $set = 'set' . $this->translateColumnName($column);
-                        $entity->$set($value);
-                    }
-                    $this->em->persist($entity);
-                }
-                $insertedItems[] = $entity;
-                $countInserts++;
-            }
         }
         if ($countInserts > 0) {
             $this->em->flush();
+            return new ModelResponse($insertedItems, $countInserts, 0, null, false, 'S:D:003', 'Selected entries have been successfully inserted into database.', $timeStamp, time());
         }
-        $this->response = array(
-            'rowCount' => $this->response['rowCount'],
-            'result' => array(
-                'set' => $insertedItems,
-                'total_rows' => $countInserts,
-                'last_insert_id' => -1,
-            ),
-            'error' => false,
-            'code' => 'scc.db.insert.done',
-        );
-        return $this->response;
+        return new ModelResponse(null, 0, 0, null, true, 'E:D:003', 'One or more entities cannot be inserted into database.', $timeStamp, time());
     }
 
     /**
-     * @name            updateShipmentGateway()
-     * Updates single item. The item must be either a post data (array) or an entity
+     * @param array $collection
      *
-     * @since           1.0.0
-     * @version         1.0.0
-     * @author          Said İmamoğlu
-     *
-     * @use             $this->resetResponse()
-     * @use             $this->updateShipmentGateways()
-     *
-     * @param           mixed   $item     Entity or Entity id of a folder
-     *
-     * @return          array   $response
-     *
+     * @return \BiberLtd\Bundle\CoreBundle\Responses\ModelResponse
      */
-
-    public function updateShipmentGateway($item)
+    public function insertShipmentGatewayLocalizations(array $collection)
     {
-        $this->resetResponse();
-        return $this->updateShipmentGateways(array($item));
-    }
-
-    /**
-     * @name            updateShipmentGateways()
-     * Updates one or more item details in database.
-     *
-     * @since           1.0.0
-     * @version         1.0.0
-     * @author          Said İmamoğlu
-     *
-     * @use             $this->update_entities()
-     * @use             $this->createException()
-     * @use             $this->listShipmentGateways()
-     *
-     *
-     * @throws          InvalidParameterException
-     *
-     * @param           array   $collection     Collection of item's entities or array of entity details.
-     *
-     * @return          array   $response
-     *
-     */
-
-    public function updateShipmentGateways($collection)
-    {
+        $timeStamp = time();
+        if (!is_array($collection)) {
+            return $this->createException('InvalidParameterValueException', 'Invalid parameter value. Parameter must be an array collection', 'E:S:001');
+        }
         $countInserts = 0;
+        $insertedItems = array();
         foreach ($collection as $data) {
-            if ($data instanceof BundleEntity\ShipmentGateway) {
+            if ($data instanceof BundleEntity\ShipmentGatewayLocalization) {
                 $entity = $data;
                 $this->em->persist($entity);
                 $insertedItems[] = $entity;
                 $countInserts++;
-            } else if (is_object($data)) {
-                $response = $this->getShipmentGateway($data->id, 'id');
-                if ($response['error']) {
-                    return $this->createException('EntityDoesNotExist', 'ShipmentGateway with id ' . $data->id, 'err.invalid.entity');
+            } else {
+                $entity = $data['entity'];
+                foreach ($data['localizations'] as $locale => $translation) {
+                    $lentity = new BundleEntity\ShipmentGatewayLocalization();
+                    /**
+                     * @var \BiberLtd\Bundle\MultiLanguageSupportBundle\Services\MultiLanguageSupportModel $lModel
+                     */
+                    $lModel = $this->kernel->getContainer()->get('multilanguagesupport.model');
+                    $response = $lModel->getLanguage($locale);
+                    if ($response->error->exist) {
+                        return $response;
+                    }
+                    $lentity->setLanguage($response->result->set);
+                    unset($response);
+                    $lentity->setShipmentGateway($entity);
+                    foreach ($translation as $column => $value) {
+                        $set = 'set' . $this->translateColumnName($column);
+                        switch ($column) {
+                            default:
+                                $entity->$set($value);
+                                break;
+                        }
+                    }
+                    $this->em->persist($entity);
+                    $insertedItems[] = $entity;
+                    $countInserts++;
                 }
-                $oldEntity = $response['result']['set'];
-                $locationModel = new LocationManagementModel($this->kernel);
+            }
+        }
+        if ($countInserts > 0) {
+            $this->em->flush();
+            return new ModelResponse($insertedItems, $countInserts, 0, null, false, 'S:D:003', 'Selected entries have been successfully inserted into database.', $timeStamp, time());
+        }
+        return new ModelResponse(null, 0, 0, null, true, 'E:D:003', 'One or more entities cannot be inserted into database.', $timeStamp, time());
+    }
+
+    /**
+     * @param mixed $item
+     *
+     * @return array
+     */
+    public function updateShipmentGateway($item)
+    {
+        return $this->updateShipmentGateways(array($item));
+    }
+
+    /**
+     * @param array $collection
+     *
+     * @return \BiberLtd\Bundle\CoreBundle\Responses\ModelResponse
+     */
+    public function updateShipmentGateways(array $collection)
+    {
+        $timeStamp = time();
+        if (!is_array($collection)) {
+            return $this->createException('InvalidParameterValueException', 'Invalid parameter value. Parameter must be an array collection', 'E:S:001');
+        }
+        $countUpdates = 0;
+        $updatedItems = array();
+        $localizations = array();
+        foreach ($collection as $data) {
+            if ($data instanceof BundleEntity\ShipmentGateway) {
+                $entity = $data;
+                $this->em->persist($entity);
+                $updatedItems[] = $entity;
+                $countUpdates++;
+            } else if (is_object($data)) {
+                if (!property_exists($data, 'id') || !is_numeric($data->id)) {
+                    return $this->createException('InvalidParameterException', 'Parameter must be an object with the "id" property and id property ​must have an integer value.', 'E:S:003');
+                }
+                if (property_exists($data, 'date_added')) {
+                    unset($data->date_added);
+                }
+                if (!property_exists($data, 'site')) {
+                    $data->site = 1;
+                }
+                $response = $this->getShipmentGateway($data->id);
+                if ($response->error->exist) {
+                    return $this->createException('EntityDoesNotExist', 'Product with id / url_key / sku  ' . $data->id . ' does not exist in database.', 'E:D:002');
+                }
+                /**
+                 * @var \BiberLtd\Bundle\ShipmentGatewayBundle\Entity\ShipmentGateway $oldEntity
+                 */
+                $oldEntity = $response->result->set;
                 foreach ($data as $column => $value) {
                     $set = 'set' . $this->translateColumnName($column);
                     switch ($column) {
                         case 'local':
-                            $localizations = array();
                             foreach ($value as $langCode => $translation) {
                                 $localization = $oldEntity->getLocalization($langCode, true);
                                 $newLocalization = false;
                                 if (!$localization) {
                                     $newLocalization = true;
                                     $localization = new BundleEntity\ShipmentGatewayLocalization();
+                                    /**
+                                     * @var \BiberLtd\Bundle\MultiLanguageSupportBundle\Services\MultiLanguageSupportModel $mlsModel
+                                     */
                                     $mlsModel = $this->kernel->getContainer()->get('multilanguagesupport.model');
-                                    $response = $mlsModel->getLanguage($langCode, 'iso_code');
-                                    $localization->setLanguage($response['result']['set']);
+                                    $response = $mlsModel->getLanguage($langCode);
+                                    $localization->setLanguage($response->result->set);
                                     $localization->setShipmentGateway($oldEntity);
                                 }
                                 foreach ($translation as $transCol => $transVal) {
@@ -629,94 +461,70 @@ class ShipmentGatewayModel extends CoreModel {
                             $oldEntity->setLocalizations($localizations);
                             break;
                         case 'site':
-                            $siteModel = $this->getContainer()->get('sitemanagement.model');
-                            $response = $siteModel->getSite($value,'id');
-                            if ($response['error']) {
-                                new CoreExceptions\EntityDoesNotExistException($this->kernel, 'Site can not found.');
+                            /**
+                             * @var \BiberLtd\Bundle\SiteManagementBundle\Services\SiteManagementModel $sModel
+                             */
+                            $sModel = $this->kernel->getContainer()->get('sitemanagement.model');
+                            $response = $sModel->getSite($value);
+                            if ($response->error->exist) {
+                                return $response;
                             }
-                            $oldEntity->$set($response['result']['set']);
-                            unset($response,$siteModel);
+                            $oldEntity->$set($response->result->set);
+                            unset($response, $sModel);
                             break;
-                        case 'date_added':
-                        case 'date_updated':
-                            new $oldEntity->$set(\DateTime('now', new \DateTimeZone($this->kernel->getContainer()->getParameter('app_timezone'))));
+                        case 'preview_file':
+                            /**
+                             * @var \BiberLtd\Bundle\FileManagementBundle\Services\FileManagementModel $fModel
+                             */
+                            $fModel = $this->kernel->getContainer()->get('filemanagement.model');
+                            $response = $fModel->getFile($value);
+                            if ($response->error->exist) {
+                                return $response;
+                            }
+                            $oldEntity->$set($response->result->set);
+                            unset($response, $fModel);
                             break;
                         case 'id':
                             break;
                         default:
                             $oldEntity->$set($value);
+                            break;
+                    }
+                    if ($oldEntity->isModified()) {
+                        $this->em->persist($oldEntity);
+                        $countUpdates++;
+                        $updatedItems[] = $oldEntity;
                     }
                 }
-                unset($locationModel);
-                $this->em->persist($oldEntity);
-                $insertedItems[] = $oldEntity;
-                $countInserts++;
-            } else {
-                new CoreExceptions\InvalidDataException($this->kernel);
             }
         }
-        /**
-         * Save data.
-         */
-        if ($countInserts > 0) {
+        if ($countUpdates > 0) {
             $this->em->flush();
+            return new ModelResponse($updatedItems, $countUpdates, 0, null, false, 'S:D:004', 'Selected entries have been successfully updated within database.', $timeStamp, time());
         }
-        /**
-         * Prepare & Return Response
-         */
-        $this->response = array(
-            'rowCount' => $this->response['rowCount'],
-            'result' => array(
-                'set' => $insertedItems,
-                'total_rows' => $countInserts,
-                'last_insert_id' => $oldEntity->getId(),
-            ),
-            'error' => false,
-            'code' => 'scc.db.insert.done',
-        );
-        return $this->response;
+        return new ModelResponse(null, 0, 0, null, true, 'E:D:004', 'One or more entities cannot be updated within database.', $timeStamp, time());
     }
 
     /**
-     * @name        deleteShipmentGatewayRegion ()
-     * Deletes an existing item from database.
+     * @param $item
      *
-     * @since            1.0.0
-     * @version         1.0.0
-     * @author          Said İmamoğlu
-     *
-     * @use             $this->deleteShipmentGatewayRegions()
-     *
-     * @param           mixed $item Entity, id or url key of item
-     * @param           string $by
-     *
-     * @return          mixed           $response
+     * @return array
      */
-    public function deleteShipmentGatewayRegion($item, $by = 'entity')
+    public function deleteShipmentGatewayRegion($item)
     {
-        return $this->deleteShipmentGatewayRegions(array($item), $by);
+        return $this->deleteShipmentGatewayRegions(array($item));
     }
 
     /**
-     * @name            deleteShipmentGatewayRegions ()
-     * Deletes provided items from database.
+     * @param array $collection
      *
-     * @since        1.0.0
-     * @version         1.0.0
-     * @author          Said İmamoğlu
-     *
-     * @use             $this->createException()
-     *
-     * @param           array $collection Collection of ShipmentGatewayRegion entities, ids, or codes or url keys
-     *
-     * @return          array           $response
+     * @return \BiberLtd\Bundle\CoreBundle\Responses\ModelResponse
      */
-    public function deleteShipmentGatewayRegions($collection)
+    public function deleteShipmentGatewayRegions(array $collection)
     {
-        $this->resetResponse();
-        /** Parameter must be an array */
+        $timeStamp = time();
         if (!is_array($collection)) {
-            return $this->createException('InvalidParameterValue', 'Array', 'err.invalid.parameter.collection');
+            return $this->createException('InvalidParameterValueException', 'Invalid parameter value. Parameter must be an array collection', 'E:S:001');
         }
         $countDeleted = 0;
         foreach ($collection as $entry) {
@@ -724,316 +532,214 @@ class ShipmentGatewayModel extends CoreModel {
                 $this->em->remove($entry);
                 $countDeleted++;
             } else {
-                switch ($entry) {
-                    case is_numeric($entry):
-                        $response = $this->getShipmentGatewayRegion($entry, 'id');
-                        break;
-                    case is_string($entry):
-                        $response = $this->getProductCategory($entry, 'url_key');
-                        break;
+                $response = $this->getShipmentGatewayRegion($entry);
+                if (!$response->error->exist) {
+                    $this->em->remove($response->result->set);
+                    $countDeleted++;
                 }
-                if ($response['error']) {
-                    $this->createException('EntryDoesNotExist', $entry, 'err.invalid.entry');
-                }
-                $entry = $response['result']['set'];
-                $this->em->remove($entry);
-                $countDeleted++;
             }
         }
-
         if ($countDeleted < 0) {
-            $this->response['error'] = true;
-            $this->response['code'] = 'err.db.fail.delete';
-
-            return $this->response;
+            return new ModelResponse(null, 0, 0, null, true, 'E:E:001', 'Unable to delete all or some of the selected entries.', $timeStamp, time());
         }
         $this->em->flush();
-        $this->response = array(
-            'rowCount' => 0,
-            'result' => array(
-                'set' => null,
-                'total_rows' => $countDeleted,
-                'last_insert_id' => null,
-            ),
-            'error' => false,
-            'code' => 'scc.db.deleted',
-        );
-        return $this->response;
+        return new ModelResponse(null, 0, 0, null, false, 'S:D:001', 'Selected entries have been successfully removed from database.', $timeStamp, time());
     }
 
     /**
-     * @name            listShipmentGatewayRegions ()
-     * Lists shipment_gateway_region data from database with given params.
+     * @param array|null $filter
+     * @param array|null $sortOrder
+     * @param array|null $limit
      *
-     * @author          Said İmamoğlu
-     * @version         1.0.0
-     * @since           1.0.0
-     *
-     * @param           array $filter
-     * @param           array $sortOrder
-     * @param           array $limit
-     * @param           string $queryStr
-     *
-     * @use             $this->createException()
-     * @use             $this->prepareWhere()
-     * @use             $this->addLimit()
-     *
-     * @return          array $this->response
+     * @return array|\BiberLtd\Bundle\CoreBundle\Responses\ModelResponse
      */
-    public function listShipmentGatewayRegions($filter = null, $sortOrder = null, $limit = null, $queryStr = null)
+    public function listShipmentGatewayRegions(array $filter = null, array $sortOrder = null, array$limit = null)
     {
-        $this->resetResponse();
+        $timeStamp = time();
         if (!is_array($sortOrder) && !is_null($sortOrder)) {
-            return $this->createException('InvalidSortOrder', '', 'err.invalid.parameter.sortorder');
+            return $this->createException('InvalidSortOrderException', '$sortOrder must be an array with key => value pairs where value can only be "asc" or "desc".', 'E:S:002');
         }
+        $oStr = $wStr = $gStr = $fStr = '';
 
-        $order_str = '';
-        $where_str = '';
-        $group_str = '';
-        $filter_str = '';
+        $qStr = 'SELECT ' . $this->entity['sgr']['alias']
+            . ' FROM ' . $this->entity['sgrl']['name'] . ' ' . $this->entity['sgrl']['alias']
+            . ' JOIN ' . $this->entity['sgrl']['alias'] . '.region ' . $this->entity['sgr']['alias'];
 
-        /**
-         * Start creating the query.
-         *
-         * Note that if no custom select query is provided we will use the below query as a start.
-         */
-        if (is_null($queryStr)) {
-            $queryStr = 'SELECT ' . $this->entity['shipment_gateway_region']['alias']
-                . ' FROM ' . $this->entity['shipment_gateway_region']['name'] . ' ' . $this->entity['shipment_gateway_region']['alias'];
-        }
-        /**
-         * Prepare ORDER BY section of query.
-         */
-        if ($sortOrder != null) {
+        if (!is_null($sortOrder)) {
             foreach ($sortOrder as $column => $direction) {
-                $order_str .= ' ' . $this->entity['shipment_gateway_region']['alias'] . '.' . $column . ' ' . strtoupper($direction) . ', ';
+                switch ($column) {
+                    case 'id':
+                        $column = $this->entity['sgr']['alias'] . '.' . $column;
+                        break;
+                    case 'name':
+                    case 'url_key':
+                        $column = $this->entity['sgrl']['alias'] . '.' . $column;
+                        break;
+                }
+                $oStr .= ' ' . $column . ' ' . strtoupper($direction) . ', ';
             }
-            $order_str = rtrim($order_str, ', ');
-            $order_str = ' ORDER BY ' . $order_str . ' ';
+            $oStr = rtrim($oStr, ', ');
+            $oStr = ' ORDER BY ' . $oStr . ' ';
         }
 
-        /**
-         * Prepare WHERE section of query.
-         */
-        if ($filter != null) {
-            $filter_str = $this->prepareWhere($filter);
-            $where_str .= ' WHERE ' . $filter_str;
+        if (!is_null($filter)) {
+            $fStr = $this->prepareWhere($filter);
+            $wStr .= ' WHERE ' . $fStr;
         }
-        $queryStr .= $where_str . $group_str . $order_str;
 
-        $query = $this->em->createQuery($queryStr);
+        $qStr .= $wStr . $gStr . $oStr;
+        $q = $this->em->createQuery($qStr);
+        $q = $this->addLimit($q, $limit);
 
-        $query = $this->addLimit($query, $limit);
+        $result = $q->getResult();
 
-        /**
-         * Prepare & Return Response
-         */
-        $result = $query->getResult();
-        $shipmentGateways = array();
-        $unique = array();
+        $entities = array();
         foreach ($result as $entry) {
-            $id = $entry->getId();
+            /**
+             * @var \BiberLtd\Bundle\ShipmentGatewayBundle\Entity\ShipmentGatewayRegionLocalization $entry
+             */
+            $id = $entry->getShipmentGatewayRegion()->getId();
             if (!isset($unique[$id])) {
-                $shipmentGateways[$id] = $entry;
-                $unique[$id] = $entry->getId();
+                $unique[$id] = '';
+                $entities[] = $entry->getShipmentGatewayRegion();
             }
         }
-
-        $total_rows = count($shipmentGateways);
-
-        if ($total_rows < 1) {
-            $this->response['code'] = 'err.db.entry.notexist';
-            return $this->response;
+        $totalRows = count($entities);
+        if ($totalRows < 1) {
+            return new ModelResponse(null, 0, 0, null, true, 'E:D:002', 'No entries found in database that matches to your criterion.', $timeStamp, time());
         }
-        $newCollection = array();
-        foreach ($shipmentGateways as $stock) {
-            $newCollection[] = $stock;
-        }
-        unset($shipmentGateways, $unique);
-
-        $this->response = array(
-            'rowCount' => $this->response['rowCount'],
-            'result' => array(
-                'set' => $newCollection,
-                'total_rows' => $total_rows,
-                'last_insert_id' => null,
-            ),
-            'error' => false,
-            'code' => 'scc.db.entry.exist',
-        );
-        return $this->response;
+        return new ModelResponse($entities, $totalRows, 0, null, false, 'S:D:002', 'Entries successfully fetched from database.', $timeStamp, time());
     }
 
     /**
-     * @name        getShipmentGatewayRegion ()
-     * Returns details of a gallery.
+     * @param mixed $region
      *
-     * @since        1.0.0
-     * @version         1.0.0
-     * @author          Said İmamoğlu
-     *
-     * @use             $this->createException()
-     * @use             $this->listShipmentGatewayRegions()
-     *
-     * @param           mixed $stock id, url_key
-     * @param           string $by entity, id, url_key
-     *
-     * @return          mixed           $response
+     * @return ModelResponse
      */
-    public function getShipmentGatewayRegion($stock, $by = 'id')
+    public function getShipmentGatewayRegion($region)
     {
-        $this->resetResponse();
-        $by_opts = array('id', 'sku', 'product');
-        if (!in_array($by, $by_opts)) {
-            return $this->createException('InvalidParameterValue', implode(',', $by_opts), 'err.invalid.parameter.by');
+        $timeStamp = time();
+        if ($region instanceof BundleEntity\ShipmentGatewayRegion) {
+            return new ModelResponse($region, 1, 0, null, false, 'S:D:002', 'Entries successfully fetched from database.', $timeStamp, time());
         }
-        if (!is_object($stock) && !is_numeric($stock) && !is_string($stock)) {
-            return $this->createException('InvalidParameter', 'ProductCategory or numeric id', 'err.invalid.parameter.product_category');
+        $result = null;
+        switch ($region) {
+            case is_numeric($region):
+                $result = $this->em->getRepository($this->entity['sgr']['name'])->findOneBy(array('id' => $region));
+                break;
+            case is_string($region):
+                $response = $this->getShipmentGatewayRegionByUrlKey($region);
+                if ($response->error->exist) {
+                    return $response;
+                }
+                $result = $response->result->set;
+                unset($response);
+                break;
         }
-        if (is_object($stock)) {
-            if (!$stock instanceof BundleEntity\ShipmentGatewayRegion) {
-                return $this->createException('InvalidParameter', 'ProductCategory', 'err.invalid.parameter.product_category');
-            }
-            /**
-             * Prepare & Return Response
-             */
-            $this->response = array(
-                'rowCount' => $this->response['rowCount'],
-                'result' => array(
-                    'set' => $stock,
-                    'total_rows' => 1,
-                    'last_insert_id' => null,
-                ),
-                'error' => false,
-                'code' => 'scc.db.entry.exist',
-            );
-            return $this->response;
+        if (is_null($result)) {
+            return new ModelResponse($result, 0, 0, null, true, 'E:D:002', 'Unable to find request entry in database.', $timeStamp, time());
         }
-        $column = '';
+
+        return new ModelResponse($result, 1, 0, null, false, 'S:D:002', 'Entries successfully fetched from database.', $timeStamp, time());
+    }
+
+    /**
+     * @param string $urlKey
+     * @param mixed|null $language
+     *
+     * @return \BiberLtd\Bundle\CoreBundle\Responses\ModelResponse
+     */
+    public function getShipmentGatewayRegionByUrlKey(\string $urlKey, $language = null)
+    {
+        $timeStamp = time();
+        if (!is_string($urlKey)) {
+            return $this->createException('InvalidParameterValueException', '$urlKey must be a string.', 'E:S:007');
+        }
         $filter[] = array(
             'glue' => 'and',
             'condition' => array(
                 array(
                     'glue' => 'and',
-                    'condition' => array('column' => $this->entity['shipment_gateway_region']['alias'] . '.' . $by, 'comparison' => '=', 'value' => $stock),
+                    'condition' => array('column' => $this->entity['sgrl']['alias'] . '.url_key', 'comparison' => '=', 'value' => $urlKey),
                 )
             )
         );
-        $response = $this->listShipmentGatewayRegions($filter, null, null, null, false);
-        if ($response['error']) {
+        if (!is_null($language))
+        {
+            /**
+             * @var \BiberLtd\Bundle\MultiLanguageSupportBundle\Services\MultiLanguageSupportModel $mModel
+             */
+            $mModel = $this->kernel->getContainer()->get('multilanguagesupport.model');
+            $response = $mModel->getLanguage($language);
+            if (!$response->error->exist) {
+                $filter[] = array(
+                    'glue' => 'and',
+                    'condition' => array(
+                        array(
+                            'glue' => 'and',
+                            'condition' => array('column' => $this->entity['sgl']['alias'] . '.language', 'comparison' => '=', 'value' => $response->result->set->getId()),
+                        )
+                    )
+                );
+            }
+        }
+        $response = $this->listShipmentGatewayRegions($filter, null, array('start' => 0, 'count' => 1));
+        if ($response->error->exist) {
             return $response;
         }
-        $collection = $response['result']['set'];
-        /**
-         * Prepare & Return Response
-         */
-        $this->response = array(
-            'rowCount' => $this->response['rowCount'],
-            'result' => array(
-                'set' => $collection[0],
-                'total_rows' => 1,
-                'last_insert_id' => null,
-            ),
-            'error' => false,
-            'code' => 'scc.db.entry.exist',
-        );
-        return $this->response;
+        $response->stats->execution->start = $timeStamp;
+        $response->stats->execution->end = time();
+        $response->result->set = $response->result->set[0];
+
+        return $response;
     }
 
     /**
-     * @name        doesShipmentGatewayRegionExist ()
-     * Checks if entry exists in database.
+     * @param mixed $region
+     * @param bool $bypass
      *
-     * @since           1.0.0
-     * @version         1.0.0
-     * @author          Said İmamoğlu
-     *
-     * @use             $this->getShipmentGatewayRegion()
-     *
-     * @param           mixed $item id, url_key
-     * @param           string $by id, url_key
-     *
-     * @param           bool $bypass If set to true does not return response but only the result.
-     *
-     * @return          mixed           $response
+     * @return \BiberLtd\Bundle\CoreBundle\Responses\ModelResponse|bool
      */
-    public function doesShipmentGatewayRegionExist($item, $by = 'id', $bypass = false)
+    public function doesShipmentGatewayRegionExist($region, \bool $bypass = false)
     {
-        $this->resetResponse();
-        $exist = false;
-
-        $response = $this->getShipmentGatewayRegion($item, $by);
-
-        if (!$response['error'] && $response['result']['total_rows'] > 0) {
-            $exist = $response['result']['set'];
-            $error = false;
-        } else {
+        $response = $this->getShipmentGatewayRegion($region);
+        $exist = true;
+        if ($response->error->exist) {
             $exist = false;
-            $error = true;
+            $response->result->set = false;
         }
-
         if ($bypass) {
             return $exist;
         }
-        /**
-         * Prepare & Return Response
-         */
-        $this->response = array(
-            'rowCount' => $this->response['rowCount'],
-            'result' => array(
-                'set' => $exist,
-                'total_rows' => 1,
-                'last_insert_id' => null,
-            ),
-            'error' => $error,
-            'code' => 'scc.db.entry.exist',
-        );
-        return $this->response;
+        return $response;
     }
 
     /**
-     * @name        insertShipmentGatewayRegion ()
-     * Inserts one or more item into database.
+     * @param mixed $item
      *
-     * @since        1.0.1
-     * @version         1.0.3
-     * @author          Said İmamoğlu
-     *
-     * @use             $this->insertFiles()
-     *
-     * @param           array $item Collection of entities or post data.
-     *
-     * @return          array           $response
+     * @return array
      */
-
     public function insertShipmentGatewayRegion($item)
     {
-        $this->resetResponse();
         return $this->insertShipmentGatewayRegions(array($item));
     }
 
     /**
-     * @name            insertShipmentGatewayRegions ()
-     * Inserts one or more items into database.
+     * @param array $collection
      *
-     * @since           1.0.0
-     * @version         1.0.3
-     * @author          Said İmamoğlu
-     *
-     * @use             $this->createException()
-     *
-     * @throws          InvalidParameterException
-     * @throws          InvalidMethodException
-     *
-     * @param           array $collection Collection of entities or post data.
-     *
-     * @return          array           $response
+     * @return \BiberLtd\Bundle\CoreBundle\Responses\ModelResponse
      */
-
-    public function insertShipmentGatewayRegions($collection)
+    public function insertShipmentGatewayRegions(array $collection)
     {
+        $timeStamp = time();
+        if (!is_array($collection)) {
+            return $this->createException('InvalidParameterValueException', 'Invalid parameter value. Parameter must be an array collection', 'E:S:001');
+        }
         $countInserts = 0;
-        $countLocalizations=0;
+        $countLocalizations = 0;
+        $insertedItems = array();
+        $localizations = array();
+        $now = new \DateTime('now', new \DateTimeZone($this->kernel->getContainer()->getParameter('app_timezone')));
         foreach ($collection as $data) {
             if ($data instanceof BundleEntity\ShipmentGatewayRegion) {
                 $entity = $data;
@@ -1041,11 +747,19 @@ class ShipmentGatewayModel extends CoreModel {
                 $insertedItems[] = $entity;
                 $countInserts++;
             } else if (is_object($data)) {
-                $localizations = array();
-                $locationModel = $this->getContainer()->get('locationmanagement.model');
+                unset($data->id);
                 $entity = new BundleEntity\ShipmentGatewayRegion();
+                if (!property_exists($data, 'date_added')) {
+                    $data->date_added = $now;
+                }
+                if (!property_exists($data, 'price')) {
+                    $data->price = 0;
+                }
+                if (!property_exists($data, 'site')) {
+                    $data->site = 1;
+                }
                 foreach ($data as $column => $value) {
-                    $localeSet=false;
+                    $localeSet = false;
                     $set = 'set' . $this->translateColumnName($column);
                     switch ($column) {
                         case 'local':
@@ -1053,227 +767,168 @@ class ShipmentGatewayModel extends CoreModel {
                             $localeSet = true;
                             $countLocalizations++;
                             break;
-                        case 'gateway':
-                            $response = $this->getShipmentGateway($value,'id');
-                            if ($response['error']) {
-                                new CoreExceptions\SiteDoesNotExistException($this->kernel, $data);
-                            }
-                            $entity->$set($response['result']['set']);
-                            unset($response);
-                            break;
-                        case 'country':
-                            $response = $locationModel->getCountry($value,'id');
-                            if ($response['error']) {
-                                new CoreExceptions\EntityDoesNotExistException($this->kernel, 'Country can not found.');
-                            }
-                            $entity->$set($response['result']['set']);
-                            unset($response);
-                            break;
-                        case 'state':
-                            $response = $locationModel->getState($value,'id');
-                            if ($response['error']) {
-                                new CoreExceptions\EntityDoesNotExistException($this->kernel, 'State can not found.');
-                            }
-                            $entity->$set($response['result']['set']);
-                            unset($response);
-                            break;
                         case 'city':
-                            $response = $locationModel->getCity($value,'id');
-                            if ($response['error']) {
-                                new CoreExceptions\EntityDoesNotExistException($this->kernel, 'City can not found.');
+                        case 'state':
+                        case 'country':
+                            /**
+                             * @var \BiberLtd\Bundle\LocationManagementBundle\Services\LocationManagementModel $lModel
+                             */
+                            $lModel = $this->kernel->getContainer()->get('locationmanagement.model');
+                            $get = 'get'.ucfirst($column);
+                            $set = 'set'.ucfirst($column);
+                            $response = $lModel->$get($value);
+                            if ($response->error->exist) {
+                                return $response;
                             }
-                            $entity->$set($response['result']['set']);
-                            unset($response);
+                            $entity->$set($response->result->set);
+                            unset($response, $sModel);
                             break;
-                        case 'site':
-                            $siteModel = $this->getContainer()->get('sitemanagement.model');
-                            $response = $siteModel->getSite($value,'id');
-                            if ($response['error']) {
-                                new CoreExceptions\EntityDoesNotExistException($this->kernel, 'Site can not found.');
-                            }
-                            $entity->$set($response['result']['set']);
-                            unset($response,$siteModel);
+                        default:
+                            $entity->$set($value);
                             break;
                     }
                     if ($localeSet) {
                         $localizations[$countInserts]['entity'] = $entity;
                     }
                 }
-                unset($locationModel);
                 $this->em->persist($entity);
                 $insertedItems[] = $entity;
+
                 $countInserts++;
-            } else {
-                new CoreExceptions\InvalidDataException($this->kernel);
             }
-        }
-        /**
-         * Save data.
-         */
-        if ($countInserts > 0) {
-            $this->em->flush();
         }
         /** Now handle localizations */
         if ($countInserts > 0 && $countLocalizations > 0) {
+            $this->em->flush();
             $this->insertShipmentGatewayRegionLocalizations($localizations);
-        }
-        /**
-         * Prepare & Return Response
-         */
-        $this->response = array(
-            'rowCount' => $this->response['rowCount'],
-            'result' => array(
-                'set' => $insertedItems,
-                'total_rows' => $countInserts,
-                'last_insert_id' => $entity->getId(),
-            ),
-            'error' => false,
-            'code' => 'scc.db.insert.done',
-        );
-        return $this->response;
-    }
-
-    /**
-     * @name            insertShipmentGatewayRegionLocalizations ()
-     *                  Inserts one or more tax rate  localizations into database.
-     *
-     * @since           1.0.0
-     * @version         1.0.1
-     * @author          Said İmamoğlu
-     *
-     * @use             $this->createException()
-     *
-     * @param           array $collection Collection of entities or post data.
-     *
-     * @return          array           $response
-     */
-    public function insertShipmentGatewayRegionLocalizations($collection)
-    {
-        $this->resetResponse();
-        /** Parameter must be an array */
-        if (!is_array($collection)) {
-            return $this->createException('InvalidParameter', 'Array', 'err.invalid.parameter.collection');
-        }
-        $countInserts = 0;
-        $insertedItems = array();
-        foreach ($collection as $item) {
-            if ($item instanceof BundleEntity\ShipmentGatewayRegionLocalization) {
-                $entity = $item;
-                $this->em->persist($entity);
-                $insertedItems[] = $entity;
-                $countInserts++;
-            } else {
-                foreach ($item['localizations'] as $language => $data) {
-                    $entity = new BundleEntity\ShipmentGatewayRegionLocalization;
-                    $entity->setShipmentGatewayRegion($item['entity']);
-                    $mlsModel = $this->kernel->getContainer()->get('multilanguagesupport.model');
-                    $response = $mlsModel->getLanguage($language, 'iso_code');
-                    if (!$response['error']) {
-                        $entity->setLanguage($response['result']['set']);
-                    } else {
-                        break 1;
-                    }
-                    foreach ($data as $column => $value) {
-                        $set = 'set' . $this->translateColumnName($column);
-                        $entity->$set($value);
-                    }
-                    $this->em->persist($entity);
-                }
-                $insertedItems[] = $entity;
-                $countInserts++;
-            }
         }
         if ($countInserts > 0) {
             $this->em->flush();
+            return new ModelResponse($insertedItems, $countInserts, 0, null, false, 'S:D:003', 'Selected entries have been successfully inserted into database.', $timeStamp, time());
         }
-        $this->response = array(
-            'rowCount' => $this->response['rowCount'],
-            'result' => array(
-                'set' => $insertedItems,
-                'total_rows' => $countInserts,
-                'last_insert_id' => -1,
-            ),
-            'error' => false,
-            'code' => 'scc.db.insert.done',
-        );
-        return $this->response;
+        return new ModelResponse(null, 0, 0, null, true, 'E:D:003', 'One or more entities cannot be inserted into database.', $timeStamp, time());
     }
 
     /**
-     * @name            updateShipmentGatewayRegion()
-     * Updates single item. The item must be either a post data (array) or an entity
+     * @param array $collection
      *
-     * @since           1.0.0
-     * @version         1.0.0
-     * @author          Said İmamoğlu
-     *
-     * @use             $this->resetResponse()
-     * @use             $this->updateShipmentGatewayRegions()
-     *
-     * @param           mixed   $item     Entity or Entity id of a folder
-     *
-     * @return          array   $response
-     *
+     * @return \BiberLtd\Bundle\CoreBundle\Responses\ModelResponse
      */
-
-    public function updateShipmentGatewayRegion($item)
+    public function insertShipmentGatewayRegionLocalizations(array $collection)
     {
-        $this->resetResponse();
-        return $this->updateShipmentGatewayRegions(array($item));
-    }
-
-    /**
-     * @name            updateShipmentGatewayRegions()
-     * Updates one or more item details in database.
-     *
-     * @since           1.0.0
-     * @version         1.0.0
-     * @author          Said İmamoğlu
-     *
-     * @use             $this->update_entities()
-     * @use             $this->createException()
-     * @use             $this->listShipmentGatewayRegions()
-     *
-     *
-     * @throws          InvalidParameterException
-     *
-     * @param           array   $collection     Collection of item's entities or array of entity details.
-     *
-     * @return          array   $response
-     *
-     */
-
-    public function updateShipmentGatewayRegions($collection)
-    {
+        $timeStamp = time();
+        if (!is_array($collection)) {
+            return $this->createException('InvalidParameterValueException', 'Invalid parameter value. Parameter must be an array collection', 'E:S:001');
+        }
         $countInserts = 0;
+        $insertedItems = array();
         foreach ($collection as $data) {
-            if ($data instanceof BundleEntity\ShipmentGatewayRegion) {
+            if ($data instanceof BundleEntity\ShipmentGatewayRegionLocalization) {
                 $entity = $data;
                 $this->em->persist($entity);
                 $insertedItems[] = $entity;
                 $countInserts++;
-            } else if (is_object($data)) {
-                $response = $this->getShipmentGatewayRegion($data->id, 'id');
-                if ($response['error']) {
-                    return new CoreExceptions\EntityDoesNotExistException($this->kernel,'ShipmentGatewayRegion with id :' . $data->id,'err.invalid.entity');
+            } else {
+                $entity = $data['entity'];
+                foreach ($data['localizations'] as $locale => $translation) {
+                    $lEntity = new BundleEntity\ShipmentGatewayRegionLocalization();
+                    /**
+                     * @var \BiberLtd\Bundle\MultiLanguageSupportBundle\Services\MultiLanguageSupportModel $lModel
+                     */
+                    $lModel = $this->kernel->getContainer()->get('multilanguagesupport.model');
+                    $response = $lModel->getLanguage($locale);
+                    if ($response->error->exist) {
+                        return $response;
+                    }
+                    $lEntity->setLanguage($response->result->set);
+                    unset($response);
+                    $lEntity->setShipmentGatewayRegion($entity);
+                    foreach ($translation as $column => $value) {
+                        $set = 'set' . $this->translateColumnName($column);
+                        switch ($column) {
+                            default:
+                                $entity->$set($value);
+                                break;
+                        }
+                    }
+                    $this->em->persist($entity);
+                    $insertedItems[] = $entity;
+                    $countInserts++;
                 }
-                $oldEntity = $response['result']['set'];
-                $locationModel = $this->getContainer()->get('locationmanagement.model');
+            }
+        }
+        if ($countInserts > 0) {
+            $this->em->flush();
+            return new ModelResponse($insertedItems, $countInserts, 0, null, false, 'S:D:003', 'Selected entries have been successfully inserted into database.', $timeStamp, time());
+        }
+        return new ModelResponse(null, 0, 0, null, true, 'E:D:003', 'One or more entities cannot be inserted into database.', $timeStamp, time());
+    }
+
+    /**
+     * @param $item
+     *
+     * @return array
+     */
+    public function updateShipmentGatewayRegion($item)
+    {
+        return $this->updateShipmentGatewayRegions(array($item));
+    }
+
+    /**
+     * @param array $collection
+     *
+     * @return \BiberLtd\Bundle\CoreBundle\Responses\ModelResponse
+     */
+    public function updateShipmentGatewayRegions(array $collection)
+    {
+        $timeStamp = time();
+        if (!is_array($collection)) {
+            return $this->createException('InvalidParameterValueException', 'Invalid parameter value. Parameter must be an array collection', 'E:S:001');
+        }
+        $countUpdates = 0;
+        $updatedItems = array();
+        $localizations = array();
+        foreach ($collection as $data) {
+            if ($data instanceof BundleEntity\ShipmentGatewayRegion) {
+                $entity = $data;
+                $this->em->persist($entity);
+                $updatedItems[] = $entity;
+                $countUpdates++;
+            } else if (is_object($data)) {
+                if (!property_exists($data, 'id') || !is_numeric($data->id)) {
+                    return $this->createException('InvalidParameterException', 'Parameter must be an object with the "id" property and id property ​must have an integer value.', 'E:S:003');
+                }
+                if (property_exists($data, 'date_added')) {
+                    unset($data->date_added);
+                }
+                if (!property_exists($data, 'site')) {
+                    $data->site = 1;
+                }
+                $response = $this->getShipmentGatewayRegion($data->id);
+                if ($response->error->exist) {
+                    return $this->createException('EntityDoesNotExist', 'Shipment gateway with id / url_key / sku  ' . $data->id . ' does not exist in database.', 'E:D:002');
+                }
+                /**
+                 * @var \BiberLtd\Bundle\ShipmentGatewayBundle\Entity\ShipmentGatewayRegion $oldEntity
+                 */
+                $oldEntity = $response->result->set;
                 foreach ($data as $column => $value) {
                     $set = 'set' . $this->translateColumnName($column);
                     switch ($column) {
                         case 'local':
-                            $localizations = array();
                             foreach ($value as $langCode => $translation) {
                                 $localization = $oldEntity->getLocalization($langCode, true);
                                 $newLocalization = false;
                                 if (!$localization) {
                                     $newLocalization = true;
                                     $localization = new BundleEntity\ShipmentGatewayRegionLocalization();
+                                    /**
+                                     * @var \BiberLtd\Bundle\MultiLanguageSupportBundle\Services\MultiLanguageSupportModel $mlsModel
+                                     */
                                     $mlsModel = $this->kernel->getContainer()->get('multilanguagesupport.model');
-                                    $response = $mlsModel->getLanguage($langCode, 'iso_code');
-                                    $localization->setLanguage($response['result']['set']);
-                                    $localization->setProduct($oldEntity);
+                                    $response = $mlsModel->getLanguage($langCode);
+                                    $localization->setLanguage($response->result->set);
+                                    $localization->setShipmentGatewayRegion($oldEntity);
                                 }
                                 foreach ($translation as $transCol => $transVal) {
                                     $transSet = 'set' . $this->translateColumnName($transCol);
@@ -1286,37 +941,23 @@ class ShipmentGatewayModel extends CoreModel {
                             }
                             $oldEntity->setLocalizations($localizations);
                             break;
-                        case 'gateway':
-                            $response = $this->getShipmentGateway($value,'id');
-                            if ($response['error']) {
-                                new CoreExceptions\SiteDoesNotExistException($this->kernel, $data);
+                        case 'site':
+                            $sModel = $this->kernel->getContainer()->get('sitemanagement.model');
+                            $response = $sModel->getSite($value);
+                            if ($response->error->exist) {
+                                return $response;
                             }
-                            $oldEntity->$set($response['result']['set']);
-                            unset($response);
+                            $oldEntity->$set($response->result->set);
+                            unset($response, $sModel);
                             break;
-                        case 'country':
-                            $response = $locationModel->getCountry($value,'id');
-                            if ($response['error']) {
-                                new CoreExceptions\EntityDoesNotExistException($this->kernel, 'Country can not found.');
+                        case 'preview_file':
+                            $fModel = $this->kernel->getContainer()->get('filemanagement.model');
+                            $response = $fModel->getFile($value);
+                            if ($response->error->exist) {
+                                return $response;
                             }
-                            $oldEntity->$set($response['result']['set']);
-                            unset($response);
-                            break;
-                        case 'state':
-                            $response = $locationModel->getState($value,'id');
-                            if ($response['error']) {
-                                new CoreExceptions\EntityDoesNotExistException($this->kernel, 'State can not found.');
-                            }
-                            $oldEntity->$set($response['result']['set']);
-                            unset($response);
-                            break;
-                        case 'city':
-                            $response = $locationModel->getCity($value,'id');
-                            if ($response['error']) {
-                                new CoreExceptions\EntityDoesNotExistException($this->kernel, 'City can not found.');
-                            }
-                            $oldEntity->$set($response['result']['set']);
-                            unset($response);
+                            $oldEntity->$set($response->result->set);
+                            unset($response, $fModel);
                             break;
                         case 'id':
                             break;
@@ -1324,61 +965,18 @@ class ShipmentGatewayModel extends CoreModel {
                             $oldEntity->$set($value);
                             break;
                     }
+                    if ($oldEntity->isModified()) {
+                        $this->em->persist($oldEntity);
+                        $countUpdates++;
+                        $updatedItems[] = $oldEntity;
+                    }
                 }
-                unset($locationModel);
-                $this->em->persist($oldEntity);
-                $insertedItems[] = $oldEntity;
-                $countInserts++;
-            } else {
-                new CoreExceptions\InvalidDataException($this->kernel);
             }
         }
-        /**
-         * Save data.
-         */
-        if ($countInserts > 0) {
+        if ($countUpdates > 0) {
             $this->em->flush();
+            return new ModelResponse($updatedItems, $countUpdates, 0, null, false, 'S:D:004', 'Selected entries have been successfully updated within database.', $timeStamp, time());
         }
-        /**
-         * Prepare & Return Response
-         */
-        $this->response = array(
-            'rowCount' => $this->response['rowCount'],
-            'result' => array(
-                'set' => $insertedItems,
-                'total_rows' => $countInserts,
-                'last_insert_id' => $oldEntity->getId(),
-            ),
-            'error' => false,
-            'code' => 'scc.db.insert.done',
-        );
-        return $this->response;
+        return new ModelResponse(null, 0, 0, null, true, 'E:D:004', 'One or more entities cannot be updated within database.', $timeStamp, time());
     }
-
 }
-/**
- * Change Log:
- * * * **********************************
- * v1.0.0                      Said İmamoğlu
- * 21.03.2014
- * **************************************
- * A deleteShipmentGateway()
- * A deleteShipmentGateways()
- * A listShipmentGateway()
- * A getShipmentGateway()
- * A doesShipmentGatewayExist()
- * A inserShipmentGateway()
- * A inserShipmentGateways()
- * A updateShipmentGateway()
- * A updateShipmentGateways()
- * A deleteShipmentGatewayRegion()
- * A deleteShipmentGatewayRegions()
- * A listShipmentGatewayRegion()
- * A getShipmentGatewayRegion()
- * A doesShipmentGatewayRegionExist()
- * A inserShipmentGatewayRegion()
- * A inserShipmentGatewayRegions()
- * A updateShipmentGatewayRegion()
- * A updateShipmentGatewayRegions()
- * 
- */
