@@ -1,6 +1,6 @@
 Shipment Gateway Bundle
  ==============
- **Namespace**: BiberLtd\Bundle\ProductManagementBundle
+ **Namespace**: BiberLtd\Bundle\ShipmentGatewayBundle
 
  **Current Version**: v3.4.0
 
