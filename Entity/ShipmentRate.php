@@ -86,7 +86,7 @@ class ShipmentRate extends CoreEntity
      *
      * @return $this
      */
-    public function setRate(\float $rate) {
+    public function setRate(float $rate) {
         if(!$this->setModified('rate', $rate)->isModified()) {
             return $this;
         }
@@ -126,7 +126,7 @@ class ShipmentRate extends CoreEntity
      *
      * @return $this
      */
-    public function setOtherRestrictions(\string $other_restrictions) {
+    public function setOtherRestrictions(string $other_restrictions) {
         if($this->setModified('other_restrictions', $other_restrictions)->isModified()) {
             $this->other_restrictions = $other_restrictions;
         }

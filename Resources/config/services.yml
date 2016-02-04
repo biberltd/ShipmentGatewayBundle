@@ -1,4 +1,4 @@
 services:
     shipmentgateway.model:
             class:        BiberLtd\Bundle\ShipmentGatewayBundle\Services\ShipmentGatewayModel
-            arguments:    [@kernel, "default", "doctrine"]
+            arguments:    ["@kernel", "default", "doctrine"]

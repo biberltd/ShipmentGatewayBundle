@@ -66,7 +66,7 @@ class ShipmentGateway extends CoreLocalizableEntity
      *
      * @return $this
      */
-    public function setSettings(\string $settings) {
+    public function setSettings(string $settings) {
         if(!$this->setModified('settings', $settings)->isModified()) {
             return $this;
         }

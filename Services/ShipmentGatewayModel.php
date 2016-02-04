@@ -42,7 +42,7 @@ class ShipmentGatewayModel extends CoreModel {
      */
     public function deleteShipmentGateways(array $collection)
     {
-        $timeStamp = time();
+        $timeStamp = microtime(true);
         if (!is_array($collection)) {
             return $this->createException('InvalidParameterValueException', 'Invalid parameter value. Parameter must be an array collection', 'E:S:001');
         }
@@ -60,10 +60,10 @@ class ShipmentGatewayModel extends CoreModel {
             }
         }
         if ($countDeleted < 0) {
-            return new ModelResponse(null, 0, 0, null, true, 'E:E:001', 'Unable to delete all or some of the selected entries.', $timeStamp, time());
+            return new ModelResponse(null, 0, 0, null, true, 'E:E:001', 'Unable to delete all or some of the selected entries.', $timeStamp, microtime(true));
         }
         $this->em->flush();
-        return new ModelResponse(null, 0, 0, null, false, 'S:D:001', 'Selected entries have been successfully removed from database.', $timeStamp, time());
+        return new ModelResponse(null, 0, 0, null, false, 'S:D:001', 'Selected entries have been successfully removed from database.', $timeStamp, microtime(true));
     }
 
     /**
@@ -75,7 +75,7 @@ class ShipmentGatewayModel extends CoreModel {
      */
     public function listShipmentGateways(array $filter = null, array $sortOrder = null, array$limit = null)
     {
-        $timeStamp = time();
+        $timeStamp = microtime(true);
         if (!is_array($sortOrder) && !is_null($sortOrder)) {
             return $this->createException('InvalidSortOrderException', '$sortOrder must be an array with key => value pairs where value can only be "asc" or "desc".', 'E:S:002');
         }
@@ -117,7 +117,7 @@ class ShipmentGatewayModel extends CoreModel {
 
         $result = $q->getResult();
 
-        $entities = array();
+        $entities = [];
         foreach ($result as $entry) {
             /**
              * @var \BiberLtd\Bundle\ShipmentGatewayBundle\Entity\ShipmentGatewayLocalization $entry
@@ -130,9 +130,9 @@ class ShipmentGatewayModel extends CoreModel {
         }
         $totalRows = count($entities);
         if ($totalRows < 1) {
-            return new ModelResponse(null, 0, 0, null, true, 'E:D:002', 'No entries found in database that matches to your criterion.', $timeStamp, time());
+            return new ModelResponse(null, 0, 0, null, true, 'E:D:002', 'No entries found in database that matches to your criterion.', $timeStamp, microtime(true));
         }
-        return new ModelResponse($entities, $totalRows, 0, null, false, 'S:D:002', 'Entries successfully fetched from database.', $timeStamp, time());
+        return new ModelResponse($entities, $totalRows, 0, null, false, 'S:D:002', 'Entries successfully fetched from database.', $timeStamp, microtime(true));
     }
 
     /**
@@ -142,9 +142,9 @@ class ShipmentGatewayModel extends CoreModel {
      */
     public function getShipmentGateway($gateway)
     {
-        $timeStamp = time();
+        $timeStamp = microtime(true);
         if ($gateway instanceof BundleEntity\ShipmentGateway) {
-            return new ModelResponse($gateway, 1, 0, null, false, 'S:D:002', 'Entries successfully fetched from database.', $timeStamp, time());
+            return new ModelResponse($gateway, 1, 0, null, false, 'S:D:002', 'Entries successfully fetched from database.', $timeStamp, microtime(true));
         }
         $result = null;
         switch ($gateway) {
@@ -161,10 +161,10 @@ class ShipmentGatewayModel extends CoreModel {
                 break;
         }
         if (is_null($result)) {
-            return new ModelResponse($result, 0, 0, null, true, 'E:D:002', 'Unable to find request entry in database.', $timeStamp, time());
+            return new ModelResponse($result, 0, 0, null, true, 'E:D:002', 'Unable to find request entry in database.', $timeStamp, microtime(true));
         }
 
-        return new ModelResponse($result, 1, 0, null, false, 'S:D:002', 'Entries successfully fetched from database.', $timeStamp, time());
+        return new ModelResponse($result, 1, 0, null, false, 'S:D:002', 'Entries successfully fetched from database.', $timeStamp, microtime(true));
     }
 
     /**
@@ -173,9 +173,9 @@ class ShipmentGatewayModel extends CoreModel {
      *
      * @return \BiberLtd\Bundle\CoreBundle\Responses\ModelResponse
      */
-    public function getShipmentGatewayByUrlKey(\string $urlKey, $language = null)
+    public function getShipmentGatewayByUrlKey(string $urlKey, $language = null)
     {
-        $timeStamp = time();
+        $timeStamp = microtime(true);
         if (!is_string($urlKey)) {
             return $this->createException('InvalidParameterValueException', '$urlKey must be a string.', 'E:S:007');
         }
@@ -211,7 +211,7 @@ class ShipmentGatewayModel extends CoreModel {
             return $response;
         }
         $response->stats->execution->start = $timeStamp;
-        $response->stats->execution->end = time();
+        $response->stats->execution->end = microtime(true);
         $response->result->set = $response->result->set[0];
 
         return $response;
@@ -223,7 +223,7 @@ class ShipmentGatewayModel extends CoreModel {
      *
      * @return \BiberLtd\Bundle\CoreBundle\Responses\ModelResponse|bool
      */
-    public function doesShipmentGatewayExist($gateway, \bool $bypass = false)
+    public function doesShipmentGatewayExist($gateway, bool $bypass = false)
     {
         $response = $this->getShipmentGateway($gateway);
         $exist = true;
@@ -254,14 +254,14 @@ class ShipmentGatewayModel extends CoreModel {
      */
     public function insertShipmentGateways(array $collection)
     {
-        $timeStamp = time();
+        $timeStamp = microtime(true);
         if (!is_array($collection)) {
             return $this->createException('InvalidParameterValueException', 'Invalid parameter value. Parameter must be an array collection', 'E:S:001');
         }
         $countInserts = 0;
         $countLocalizations = 0;
-        $insertedItems = array();
-        $localizations = array();
+        $insertedItems = [];
+        $localizations = [];
         $now = new \DateTime('now', new \DateTimeZone($this->kernel->getContainer()->getParameter('app_timezone')));
         foreach ($collection as $data) {
             if ($data instanceof BundleEntity\ShipmentGateway) {
@@ -323,9 +323,9 @@ class ShipmentGatewayModel extends CoreModel {
         }
         if ($countInserts > 0) {
             $this->em->flush();
-            return new ModelResponse($insertedItems, $countInserts, 0, null, false, 'S:D:003', 'Selected entries have been successfully inserted into database.', $timeStamp, time());
+            return new ModelResponse($insertedItems, $countInserts, 0, null, false, 'S:D:003', 'Selected entries have been successfully inserted into database.', $timeStamp, microtime(true));
         }
-        return new ModelResponse(null, 0, 0, null, true, 'E:D:003', 'One or more entities cannot be inserted into database.', $timeStamp, time());
+        return new ModelResponse(null, 0, 0, null, true, 'E:D:003', 'One or more entities cannot be inserted into database.', $timeStamp, microtime(true));
     }
 
     /**
@@ -335,12 +335,12 @@ class ShipmentGatewayModel extends CoreModel {
      */
     public function insertShipmentGatewayLocalizations(array $collection)
     {
-        $timeStamp = time();
+        $timeStamp = microtime(true);
         if (!is_array($collection)) {
             return $this->createException('InvalidParameterValueException', 'Invalid parameter value. Parameter must be an array collection', 'E:S:001');
         }
         $countInserts = 0;
-        $insertedItems = array();
+        $insertedItems = [];
         foreach ($collection as $data) {
             if ($data instanceof BundleEntity\ShipmentGatewayLocalization) {
                 $entity = $data;
@@ -378,9 +378,9 @@ class ShipmentGatewayModel extends CoreModel {
         }
         if ($countInserts > 0) {
             $this->em->flush();
-            return new ModelResponse($insertedItems, $countInserts, 0, null, false, 'S:D:003', 'Selected entries have been successfully inserted into database.', $timeStamp, time());
+            return new ModelResponse($insertedItems, $countInserts, 0, null, false, 'S:D:003', 'Selected entries have been successfully inserted into database.', $timeStamp, microtime(true));
         }
-        return new ModelResponse(null, 0, 0, null, true, 'E:D:003', 'One or more entities cannot be inserted into database.', $timeStamp, time());
+        return new ModelResponse(null, 0, 0, null, true, 'E:D:003', 'One or more entities cannot be inserted into database.', $timeStamp, microtime(true));
     }
 
     /**
@@ -400,13 +400,13 @@ class ShipmentGatewayModel extends CoreModel {
      */
     public function updateShipmentGateways(array $collection)
     {
-        $timeStamp = time();
+        $timeStamp = microtime(true);
         if (!is_array($collection)) {
             return $this->createException('InvalidParameterValueException', 'Invalid parameter value. Parameter must be an array collection', 'E:S:001');
         }
         $countUpdates = 0;
-        $updatedItems = array();
-        $localizations = array();
+        $updatedItems = [];
+        $localizations = [];
         foreach ($collection as $data) {
             if ($data instanceof BundleEntity\ShipmentGateway) {
                 $entity = $data;
@@ -500,9 +500,9 @@ class ShipmentGatewayModel extends CoreModel {
         }
         if ($countUpdates > 0) {
             $this->em->flush();
-            return new ModelResponse($updatedItems, $countUpdates, 0, null, false, 'S:D:004', 'Selected entries have been successfully updated within database.', $timeStamp, time());
+            return new ModelResponse($updatedItems, $countUpdates, 0, null, false, 'S:D:004', 'Selected entries have been successfully updated within database.', $timeStamp, microtime(true));
         }
-        return new ModelResponse(null, 0, 0, null, true, 'E:D:004', 'One or more entities cannot be updated within database.', $timeStamp, time());
+        return new ModelResponse(null, 0, 0, null, true, 'E:D:004', 'One or more entities cannot be updated within database.', $timeStamp, microtime(true));
     }
 
     /**
@@ -522,7 +522,7 @@ class ShipmentGatewayModel extends CoreModel {
      */
     public function deleteShipmentGatewayRegions(array $collection)
     {
-        $timeStamp = time();
+        $timeStamp = microtime(true);
         if (!is_array($collection)) {
             return $this->createException('InvalidParameterValueException', 'Invalid parameter value. Parameter must be an array collection', 'E:S:001');
         }
@@ -540,10 +540,10 @@ class ShipmentGatewayModel extends CoreModel {
             }
         }
         if ($countDeleted < 0) {
-            return new ModelResponse(null, 0, 0, null, true, 'E:E:001', 'Unable to delete all or some of the selected entries.', $timeStamp, time());
+            return new ModelResponse(null, 0, 0, null, true, 'E:E:001', 'Unable to delete all or some of the selected entries.', $timeStamp, microtime(true));
         }
         $this->em->flush();
-        return new ModelResponse(null, 0, 0, null, false, 'S:D:001', 'Selected entries have been successfully removed from database.', $timeStamp, time());
+        return new ModelResponse(null, 0, 0, null, false, 'S:D:001', 'Selected entries have been successfully removed from database.', $timeStamp, microtime(true));
     }
 
     /**
@@ -555,7 +555,7 @@ class ShipmentGatewayModel extends CoreModel {
      */
     public function listShipmentGatewayRegions(array $filter = null, array $sortOrder = null, array$limit = null)
     {
-        $timeStamp = time();
+        $timeStamp = microtime(true);
         if (!is_array($sortOrder) && !is_null($sortOrder)) {
             return $this->createException('InvalidSortOrderException', '$sortOrder must be an array with key => value pairs where value can only be "asc" or "desc".', 'E:S:002');
         }
@@ -593,7 +593,7 @@ class ShipmentGatewayModel extends CoreModel {
 
         $result = $q->getResult();
 
-        $entities = array();
+        $entities = [];
         foreach ($result as $entry) {
             /**
              * @var \BiberLtd\Bundle\ShipmentGatewayBundle\Entity\ShipmentGatewayRegionLocalization $entry
@@ -606,9 +606,9 @@ class ShipmentGatewayModel extends CoreModel {
         }
         $totalRows = count($entities);
         if ($totalRows < 1) {
-            return new ModelResponse(null, 0, 0, null, true, 'E:D:002', 'No entries found in database that matches to your criterion.', $timeStamp, time());
+            return new ModelResponse(null, 0, 0, null, true, 'E:D:002', 'No entries found in database that matches to your criterion.', $timeStamp, microtime(true));
         }
-        return new ModelResponse($entities, $totalRows, 0, null, false, 'S:D:002', 'Entries successfully fetched from database.', $timeStamp, time());
+        return new ModelResponse($entities, $totalRows, 0, null, false, 'S:D:002', 'Entries successfully fetched from database.', $timeStamp, microtime(true));
     }
 
     /**
@@ -618,9 +618,9 @@ class ShipmentGatewayModel extends CoreModel {
      */
     public function getShipmentGatewayRegion($region)
     {
-        $timeStamp = time();
+        $timeStamp = microtime(true);
         if ($region instanceof BundleEntity\ShipmentGatewayRegion) {
-            return new ModelResponse($region, 1, 0, null, false, 'S:D:002', 'Entries successfully fetched from database.', $timeStamp, time());
+            return new ModelResponse($region, 1, 0, null, false, 'S:D:002', 'Entries successfully fetched from database.', $timeStamp, microtime(true));
         }
         $result = null;
         switch ($region) {
@@ -637,10 +637,10 @@ class ShipmentGatewayModel extends CoreModel {
                 break;
         }
         if (is_null($result)) {
-            return new ModelResponse($result, 0, 0, null, true, 'E:D:002', 'Unable to find request entry in database.', $timeStamp, time());
+            return new ModelResponse($result, 0, 0, null, true, 'E:D:002', 'Unable to find request entry in database.', $timeStamp, microtime(true));
         }
 
-        return new ModelResponse($result, 1, 0, null, false, 'S:D:002', 'Entries successfully fetched from database.', $timeStamp, time());
+        return new ModelResponse($result, 1, 0, null, false, 'S:D:002', 'Entries successfully fetched from database.', $timeStamp, microtime(true));
     }
 
     /**
@@ -649,9 +649,9 @@ class ShipmentGatewayModel extends CoreModel {
      *
      * @return \BiberLtd\Bundle\CoreBundle\Responses\ModelResponse
      */
-    public function getShipmentGatewayRegionByUrlKey(\string $urlKey, $language = null)
+    public function getShipmentGatewayRegionByUrlKey(string $urlKey, $language = null)
     {
-        $timeStamp = time();
+        $timeStamp = microtime(true);
         if (!is_string($urlKey)) {
             return $this->createException('InvalidParameterValueException', '$urlKey must be a string.', 'E:S:007');
         }
@@ -688,7 +688,7 @@ class ShipmentGatewayModel extends CoreModel {
             return $response;
         }
         $response->stats->execution->start = $timeStamp;
-        $response->stats->execution->end = time();
+        $response->stats->execution->end = microtime(true);
         $response->result->set = $response->result->set[0];
 
         return $response;
@@ -700,7 +700,7 @@ class ShipmentGatewayModel extends CoreModel {
      *
      * @return \BiberLtd\Bundle\CoreBundle\Responses\ModelResponse|bool
      */
-    public function doesShipmentGatewayRegionExist($region, \bool $bypass = false)
+    public function doesShipmentGatewayRegionExist($region, bool $bypass = false)
     {
         $response = $this->getShipmentGatewayRegion($region);
         $exist = true;
@@ -731,14 +731,14 @@ class ShipmentGatewayModel extends CoreModel {
      */
     public function insertShipmentGatewayRegions(array $collection)
     {
-        $timeStamp = time();
+        $timeStamp = microtime(true);
         if (!is_array($collection)) {
             return $this->createException('InvalidParameterValueException', 'Invalid parameter value. Parameter must be an array collection', 'E:S:001');
         }
         $countInserts = 0;
         $countLocalizations = 0;
-        $insertedItems = array();
-        $localizations = array();
+        $insertedItems = [];
+        $localizations = [];
         $now = new \DateTime('now', new \DateTimeZone($this->kernel->getContainer()->getParameter('app_timezone')));
         foreach ($collection as $data) {
             if ($data instanceof BundleEntity\ShipmentGatewayRegion) {
@@ -804,9 +804,9 @@ class ShipmentGatewayModel extends CoreModel {
         }
         if ($countInserts > 0) {
             $this->em->flush();
-            return new ModelResponse($insertedItems, $countInserts, 0, null, false, 'S:D:003', 'Selected entries have been successfully inserted into database.', $timeStamp, time());
+            return new ModelResponse($insertedItems, $countInserts, 0, null, false, 'S:D:003', 'Selected entries have been successfully inserted into database.', $timeStamp, microtime(true));
         }
-        return new ModelResponse(null, 0, 0, null, true, 'E:D:003', 'One or more entities cannot be inserted into database.', $timeStamp, time());
+        return new ModelResponse(null, 0, 0, null, true, 'E:D:003', 'One or more entities cannot be inserted into database.', $timeStamp, microtime(true));
     }
 
     /**
@@ -816,12 +816,12 @@ class ShipmentGatewayModel extends CoreModel {
      */
     public function insertShipmentGatewayRegionLocalizations(array $collection)
     {
-        $timeStamp = time();
+        $timeStamp = microtime(true);
         if (!is_array($collection)) {
             return $this->createException('InvalidParameterValueException', 'Invalid parameter value. Parameter must be an array collection', 'E:S:001');
         }
         $countInserts = 0;
-        $insertedItems = array();
+        $insertedItems = [];
         foreach ($collection as $data) {
             if ($data instanceof BundleEntity\ShipmentGatewayRegionLocalization) {
                 $entity = $data;
@@ -859,9 +859,9 @@ class ShipmentGatewayModel extends CoreModel {
         }
         if ($countInserts > 0) {
             $this->em->flush();
-            return new ModelResponse($insertedItems, $countInserts, 0, null, false, 'S:D:003', 'Selected entries have been successfully inserted into database.', $timeStamp, time());
+            return new ModelResponse($insertedItems, $countInserts, 0, null, false, 'S:D:003', 'Selected entries have been successfully inserted into database.', $timeStamp, microtime(true));
         }
-        return new ModelResponse(null, 0, 0, null, true, 'E:D:003', 'One or more entities cannot be inserted into database.', $timeStamp, time());
+        return new ModelResponse(null, 0, 0, null, true, 'E:D:003', 'One or more entities cannot be inserted into database.', $timeStamp, microtime(true));
     }
 
     /**
@@ -881,13 +881,13 @@ class ShipmentGatewayModel extends CoreModel {
      */
     public function updateShipmentGatewayRegions(array $collection)
     {
-        $timeStamp = time();
+        $timeStamp = microtime(true);
         if (!is_array($collection)) {
             return $this->createException('InvalidParameterValueException', 'Invalid parameter value. Parameter must be an array collection', 'E:S:001');
         }
         $countUpdates = 0;
-        $updatedItems = array();
-        $localizations = array();
+        $updatedItems = [];
+        $localizations = [];
         foreach ($collection as $data) {
             if ($data instanceof BundleEntity\ShipmentGatewayRegion) {
                 $entity = $data;
@@ -975,8 +975,8 @@ class ShipmentGatewayModel extends CoreModel {
         }
         if ($countUpdates > 0) {
             $this->em->flush();
-            return new ModelResponse($updatedItems, $countUpdates, 0, null, false, 'S:D:004', 'Selected entries have been successfully updated within database.', $timeStamp, time());
+            return new ModelResponse($updatedItems, $countUpdates, 0, null, false, 'S:D:004', 'Selected entries have been successfully updated within database.', $timeStamp, microtime(true));
         }
-        return new ModelResponse(null, 0, 0, null, true, 'E:D:004', 'One or more entities cannot be updated within database.', $timeStamp, time());
+        return new ModelResponse(null, 0, 0, null, true, 'E:D:004', 'One or more entities cannot be updated within database.', $timeStamp, microtime(true));
     }
 }
