@@ -81,7 +81,7 @@ class ShipmentGatewayModel extends CoreModel {
         }
         $oStr = $wStr = $gStr = $fStr = '';
 
-        $qStr = 'SELECT ' . $this->entity['sg']['alias']
+        $qStr = 'SELECT ' . $this->entity['sgl']['alias'] .', '. $this->entity['sg']['alias']
             . ' FROM ' . $this->entity['sgl']['name'] . ' ' . $this->entity['sgl']['alias']
             . ' JOIN ' . $this->entity['sgl']['alias'] . '.shipment_gateway ' . $this->entity['sg']['alias'];
 
