@@ -83,7 +83,7 @@ class ShipmentGatewayModel extends CoreModel {
 
         $qStr = 'SELECT ' . $this->entity['sg']['alias']
             . ' FROM ' . $this->entity['sgl']['name'] . ' ' . $this->entity['sgl']['alias']
-            . ' JOIN ' . $this->entity['sgl']['alias'] . '.gateway ' . $this->entity['sg']['alias'];
+            . ' JOIN ' . $this->entity['sgl']['alias'] . '.shipment_gateway ' . $this->entity['sg']['alias'];
 
         if (!is_null($sortOrder)) {
             foreach ($sortOrder as $column => $direction) {
