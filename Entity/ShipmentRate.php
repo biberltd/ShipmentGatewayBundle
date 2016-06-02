@@ -48,7 +48,7 @@ class ShipmentRate extends CoreEntity
     private $shipment_gateway_region;
 
     /** 
-     * @ORM\ManyToOne(targetEntity="ProductCategory")
+     * @ORM\ManyToOne(targetEntity="\BiberLtd\Bundle\ProductManagementBundle\Entity\ProductCategory")
      * @ORM\JoinColumn(name="product_category", referencedColumnName="id", nullable=false, onDelete="CASCADE")
      * @var \BiberLtd\Bundle\ProductManagementBundle\Entity\ProductCategory
      */

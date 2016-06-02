@@ -63,7 +63,7 @@ class ShipmentGatewayRegion extends CoreEntity
 
     /** 
      * @ORM\OneToMany(targetEntity="ShipmentGatewayRegionLocalization", mappedBy="shipment_gateway_region")
-     * @array
+     * @var array
      */
     protected $localizations;
 
